@@ -1,0 +1,133 @@
+name: CLAIMS_ANALYTICS_MODEL
+tables:
+  - name: INSURANCE_CLAIMS
+    base_table:
+      database: HEALTHCARE_HOL_DB
+      schema: OPERATIONS
+      table: INSURANCE_CLAIMS
+    dimensions:
+      - name: claim_id
+        expr: CLAIM_ID
+        data_type: NUMBER
+        description: Unique identifier for the insurance claim
+      - name: encounter_id
+        expr: ENCOUNTER_ID
+        data_type: NUMBER
+        description: Associated patient encounter
+      - name: patient_id
+        expr: PATIENT_ID
+        data_type: NUMBER
+        description: Patient who received care
+      - name: insurance_type
+        expr: INSURANCE_TYPE
+        data_type: VARCHAR
+        description: Type of insurance (Medicare, Medicaid, Commercial, Self-Pay)
+      - name: claim_status
+        expr: STATUS
+        data_type: VARCHAR
+        description: Current status of the claim (Submitted, Approved, Denied, Pending)
+    measures:
+      - name: claim_count
+        expr: COUNT(CLAIM_ID)
+        data_type: NUMBER
+        description: Total number of claims
+      - name: total_claim_amount
+        expr: SUM(CLAIM_AMOUNT)
+        data_type: NUMBER
+        description: Total dollar amount claimed
+      - name: total_approved_amount
+        expr: SUM(APPROVED_AMOUNT)
+        data_type: NUMBER
+        description: Total dollar amount approved by insurance
+      - name: avg_claim_amount
+        expr: AVG(CLAIM_AMOUNT)
+        data_type: NUMBER
+        description: Average claim amount
+      - name: approval_rate
+        expr: "COUNT(CASE WHEN STATUS = 'Approved' THEN 1 END) * 100.0 / NULLIF(COUNT(CLAIM_ID), 0)"
+        data_type: NUMBER
+        description: Percentage of claims approved
+      - name: denial_rate
+        expr: "COUNT(CASE WHEN STATUS = 'Denied' THEN 1 END) * 100.0 / NULLIF(COUNT(CLAIM_ID), 0)"
+        data_type: NUMBER
+        description: Percentage of claims denied
+      - name: avg_reimbursement_pct
+        expr: AVG(APPROVED_AMOUNT * 100.0 / NULLIF(CLAIM_AMOUNT, 0))
+        data_type: NUMBER
+        description: Average percentage of claim amount that gets reimbursed
+    time_dimensions:
+      - name: submission_date
+        expr: SUBMISSION_DATE
+        data_type: DATE
+        description: Date the claim was submitted
+      - name: resolution_date
+        expr: RESOLUTION_DATE
+        data_type: DATE
+        description: Date the claim was resolved
+  - name: PATIENTS
+    base_table:
+      database: HEALTHCARE_HOL_DB
+      schema: CLINICAL
+      table: PATIENTS
+    dimensions:
+      - name: patient_id
+        expr: PATIENT_ID
+        data_type: NUMBER
+      - name: patient_name
+        expr: FIRST_NAME || ' ' || LAST_NAME
+        data_type: VARCHAR
+        description: Full name of the patient
+      - name: gender
+        expr: GENDER
+        data_type: VARCHAR
+      - name: patient_insurance_type
+        expr: INSURANCE_TYPE
+        data_type: VARCHAR
+    time_dimensions:
+      - name: dob
+        expr: DOB
+        data_type: DATE
+  - name: ENCOUNTERS
+    base_table:
+      database: HEALTHCARE_HOL_DB
+      schema: CLINICAL
+      table: ENCOUNTERS
+    dimensions:
+      - name: encounter_id
+        expr: ENCOUNTER_ID
+        data_type: NUMBER
+      - name: encounter_type
+        expr: ENCOUNTER_TYPE
+        data_type: VARCHAR
+      - name: primary_diagnosis
+        expr: PRIMARY_DIAGNOSIS
+        data_type: VARCHAR
+      - name: encounter_status
+        expr: STATUS
+        data_type: VARCHAR
+    measures:
+      - name: avg_length_of_stay
+        expr: AVG(LENGTH_OF_STAY)
+        data_type: NUMBER
+    time_dimensions:
+      - name: admission_date
+        expr: ADMISSION_DATE
+        data_type: DATE
+relationships:
+  - left_table: INSURANCE_CLAIMS
+    right_table: PATIENTS
+    join_type: LEFT
+    relationship_columns:
+      - left_column: PATIENT_ID
+        right_column: PATIENT_ID
+  - left_table: INSURANCE_CLAIMS
+    right_table: ENCOUNTERS
+    join_type: LEFT
+    relationship_columns:
+      - left_column: ENCOUNTER_ID
+        right_column: ENCOUNTER_ID
+verified_queries:
+  - question: What is the total claim amount by insurance type?
+    sql: SELECT INSURANCE_TYPE, SUM(CLAIM_AMOUNT) AS TOTAL_CLAIMED, SUM(APPROVED_AMOUNT) AS TOTAL_APPROVED FROM HEALTHCARE_HOL_DB.OPERATIONS.INSURANCE_CLAIMS GROUP BY INSURANCE_TYPE ORDER BY TOTAL_CLAIMED DESC
+  - question: Which claims were denied?
+    sql: SELECT c.CLAIM_ID, p.FIRST_NAME || ' ' || p.LAST_NAME AS PATIENT_NAME, c.INSURANCE_TYPE, c.CLAIM_AMOUNT, c.STATUS FROM HEALTHCARE_HOL_DB.OPERATIONS.INSURANCE_CLAIMS c JOIN HEALTHCARE_HOL_DB.CLINICAL.PATIENTS p ON c.PATIENT_ID = p.PATIENT_ID WHERE c.STATUS = 'Denied'

@@ -1,0 +1,149 @@
+name: MARKET_RISK_MODEL
+tables:
+  - name: RISK_SCORES
+    base_table:
+      database: FINSERV_HOL_DB
+      schema: RISK
+      table: RISK_SCORES
+    dimensions:
+      - name: risk_id
+        expr: RISK_ID
+        data_type: NUMBER
+      - name: account_id
+        expr: ACCOUNT_ID
+        data_type: NUMBER
+      - name: concentration_risk
+        expr: CONCENTRATION_RISK
+        data_type: VARCHAR
+        description: Level of concentration risk (High, Medium, Low)
+    measures:
+      - name: avg_risk_score
+        expr: AVG(RISK_SCORE)
+        data_type: NUMBER
+        description: Average portfolio risk score
+      - name: total_var_95
+        expr: SUM(VAR_95)
+        data_type: NUMBER
+        description: Total Value at Risk at 95% confidence
+      - name: avg_sharpe_ratio
+        expr: AVG(SHARPE_RATIO)
+        data_type: NUMBER
+        description: Average Sharpe ratio across portfolios
+      - name: avg_max_drawdown
+        expr: AVG(MAX_DRAWDOWN_PCT)
+        data_type: NUMBER
+        description: Average maximum drawdown percentage
+      - name: high_risk_account_count
+        expr: "COUNT(CASE WHEN RISK_SCORE > 0.8 THEN 1 END)"
+        data_type: NUMBER
+        description: Number of accounts with risk score above 0.8
+    time_dimensions:
+      - name: assessment_date
+        expr: ASSESSMENT_DATE
+        data_type: DATE
+  - name: COMPLIANCE_ALERTS
+    base_table:
+      database: FINSERV_HOL_DB
+      schema: RISK
+      table: COMPLIANCE_ALERTS
+    dimensions:
+      - name: alert_id
+        expr: ALERT_ID
+        data_type: NUMBER
+      - name: alert_account_id
+        expr: ACCOUNT_ID
+        data_type: NUMBER
+      - name: alert_type
+        expr: ALERT_TYPE
+        data_type: VARCHAR
+      - name: severity
+        expr: SEVERITY
+        data_type: VARCHAR
+      - name: alert_description
+        expr: DESCRIPTION
+        data_type: VARCHAR
+      - name: alert_status
+        expr: STATUS
+        data_type: VARCHAR
+    measures:
+      - name: alert_count
+        expr: COUNT(ALERT_ID)
+        data_type: NUMBER
+      - name: open_alert_count
+        expr: "COUNT(CASE WHEN STATUS = 'Open' THEN 1 END)"
+        data_type: NUMBER
+      - name: critical_alert_count
+        expr: "COUNT(CASE WHEN SEVERITY = 'Critical' THEN 1 END)"
+        data_type: NUMBER
+    time_dimensions:
+      - name: alert_created_date
+        expr: CREATED_DATE
+        data_type: DATE
+      - name: alert_resolved_date
+        expr: RESOLVED_DATE
+        data_type: DATE
+  - name: ACCOUNTS
+    base_table:
+      database: FINSERV_HOL_DB
+      schema: PORTFOLIO
+      table: ACCOUNTS
+    dimensions:
+      - name: account_id
+        expr: ACCOUNT_ID
+        data_type: NUMBER
+      - name: account_name
+        expr: ACCOUNT_NAME
+        data_type: VARCHAR
+      - name: account_type
+        expr: ACCOUNT_TYPE
+        data_type: VARCHAR
+    measures:
+      - name: total_balance
+        expr: SUM(BALANCE)
+        data_type: NUMBER
+  - name: CLIENTS
+    base_table:
+      database: FINSERV_HOL_DB
+      schema: PORTFOLIO
+      table: CLIENTS
+    dimensions:
+      - name: client_id
+        expr: CLIENT_ID
+        data_type: NUMBER
+      - name: client_name
+        expr: FIRST_NAME || ' ' || LAST_NAME
+        data_type: VARCHAR
+      - name: risk_tolerance
+        expr: RISK_TOLERANCE
+        data_type: VARCHAR
+relationships:
+  - left_table: RISK_SCORES
+    right_table: ACCOUNTS
+    join_type: LEFT
+    relationship_columns:
+      - left_column: ACCOUNT_ID
+        right_column: ACCOUNT_ID
+  - left_table: COMPLIANCE_ALERTS
+    right_table: ACCOUNTS
+    join_type: LEFT
+    relationship_columns:
+      - left_column: ACCOUNT_ID
+        right_column: ACCOUNT_ID
+  - left_table: ACCOUNTS
+    right_table: CLIENTS
+    join_type: LEFT
+    relationship_columns:
+      - left_column: CLIENT_ID
+        right_column: CLIENT_ID
+custom_filters:
+  - name: high_risk_portfolios
+    expr: RISK_SCORE > 0.8
+    description: Portfolios with risk scores exceeding the high-risk threshold
+  - name: open_alerts_only
+    expr: STATUS = 'Open'
+    description: Only show unresolved compliance alerts
+verified_queries:
+  - question: What is the total Value at Risk across all high-risk accounts?
+    sql: SELECT SUM(VAR_95) AS TOTAL_VAR FROM FINSERV_HOL_DB.RISK.RISK_SCORES WHERE RISK_SCORE > 0.8
+  - question: Show me all open compliance alerts by severity
+    sql: SELECT a.ALERT_TYPE, a.SEVERITY, a.DESCRIPTION, ac.ACCOUNT_NAME, c.FIRST_NAME || ' ' || c.LAST_NAME AS CLIENT_NAME FROM FINSERV_HOL_DB.RISK.COMPLIANCE_ALERTS a JOIN FINSERV_HOL_DB.PORTFOLIO.ACCOUNTS ac ON a.ACCOUNT_ID = ac.ACCOUNT_ID JOIN FINSERV_HOL_DB.PORTFOLIO.CLIENTS c ON ac.CLIENT_ID = c.CLIENT_ID WHERE a.STATUS = 'Open' ORDER BY CASE a.SEVERITY WHEN 'Critical' THEN 1 WHEN 'High' THEN 2 WHEN 'Medium' THEN 3 ELSE 4 END

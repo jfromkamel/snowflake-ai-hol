@@ -83,6 +83,19 @@ ALTER GIT REPOSITORY HOL_UTILS.PUBLIC.SNOWFLAKE_AI_HOL_REPO FETCH;
 LS @HOL_UTILS.PUBLIC.SNOWFLAKE_AI_HOL_REPO/branches/main/;
 ```
 
+
+### 0.4 Enable Cortex AI
+
+Snowflake Cortex AI features used in this lab may require cross-region model access. Run this prompt to enable it:
+
+```
+Please enable cross-region Cortex AI for my account so all AI features
+work correctly during this lab. Run:
+
+ALTER ACCOUNT SET CORTEX_ENABLED_CROSS_REGION = 'ANY_REGION';
+```
+> **What this does:** Allows Snowflake to route AI workloads to the best available region when a model is not available in your current region. Required for Cortex Analyst, Cortex Search, and Snowflake Intelligence to work reliably on trial accounts.
+
 ---
 
 ## Step 1: Build the Database and Load Data (10 minutes)

@@ -154,22 +154,49 @@ Test in AI & ML > Agents > INDUSTRIAL_AGENT Playground.
 
 ### 5.1 Chat Page
 ```
-Build a 3-page Streamlit app in Snowflake called INDUSTRIAL_ASSISTANT_APP
+Build a single-page Streamlit app in Snowflake called INDUSTRIAL_ASSISTANT_APP
 in INDUSTRIAL_HOL_DB.OPERATIONS using INDUSTRIAL_HOL_WH.
 
-Start with page 1 -- "Chat" (the home page):
-- A sidebar with the title "Industrial Operations Assistant" and a brief description
-- A conversational chat interface connected to INDUSTRIAL_AGENT
-- Stream the agent's responses in real time as they arrive
-- When the agent returns data, display it as a table
+Use st.tabs() to create a horizontal tab bar at the top of the page
+with three tabs: "Chat", "Dashboard", and "Optimization". All three
+tabs should be visible and switchable at the top -- no sidebar page
+navigation.
+
+Start with the Chat tab:
+- A sidebar with the title "Operations Intelligence" and a brief description of the app
+- A chat interface where users can have a conversation with INDUSTRIAL_AGENT
+- Show the agent's responses in the chat as they arrive
+- When the agent returns data, display it as a table below the response
 - When the agent returns SQL, show it in a collapsible section
-- Keep the full conversation history visible as users scroll
-- Use claude-3-5-sonnet as the model
+- Keep the conversation history visible throughout the session
+
+Apply a modern industrial SaaS design -- think Siemens MindSphere or Rockwell
+FactoryTalk, not a dark video game UI:
+- Main content background: clean off-white (#F8FAFC) with white cards and
+  subtle drop shadows -- the primary surface should feel light and open
+- Sidebar: dark slate (#1E293B) with white text and a steel blue left border
+  on the active page -- the sidebar is the only dark area
+- Primary color: steel blue (#2563EB) for headings, buttons, links, and
+  active states
+- Typography: sentence case throughout -- no all-caps; use bold weight for
+  section headers, regular weight for body text
+- Status indicators: green (#16A34A) for operational, amber (#D97706) for
+  maintenance due -- reserve red (#DC2626) strictly for overdue or failed
+- KPI cards: white background, steel blue top border, large bold metric
+  number in dark slate (#1E293B), small gray label below
+- Data tables: white background, light gray row dividers (#E2E8F0),
+  status pills (small colored badges) instead of full-row color fills
+- Charts: white background with steel blue as the primary series color
+- Chat input area: white background matching the main content -- it should
+  feel like a natural extension of the page, not a floating element
+- Overall feel: clean, professional, and trustworthy -- the kind of dashboard
+  a plant director would present in a boardroom, not a control room operator
+
 ```
 
 ### 5.2 Dashboard Page
 ```
-Add a second page to INDUSTRIAL_ASSISTANT_APP called "Dashboard".
+Fill in the Dashboard tab of INDUSTRIAL_ASSISTANT_APP with the following content.
 
 This page should show live data from INDUSTRIAL_HOL_DB:
 
@@ -189,32 +216,97 @@ BOTTOM ROW - a critical alerts table:
   Replacement Cost
 - Sort by criticality then days overdue
 - Include a button to download the table as a CSV
+
+Chart styling:
+Use plotly for all charts. Use green (#16A34A), amber (#D97706), and red (#DC2626) to represent operational status (good/warning/critical). For non-status charts use steel blue (#2563EB) as the primary series color and slate gray (#64748B) as the secondary. All chart backgrounds should be white (#FFFFFF) with light gray grid lines. No dark backgrounds on any chart.
+Position the legend below each chart (orientation="h", y=-0.3) to prevent overlap with chart titles. Add a top margin (t=50) on all charts so the title never crowds the plot area.
 ```
 
 ### 5.3 Optimization Page
 ```
-Add a third page to INDUSTRIAL_ASSISTANT_APP called "Optimization".
+Fill in the Optimization tab of INDUSTRIAL_ASSISTANT_APP with the following content.
 
-Title: "Maintenance Scheduling Optimizer"
-Subtitle: "Optimize the scheduling of overdue and upcoming maintenance
-work to minimize downtime while respecting technician availability."
+Title: "Operations Intelligence"
+Subtitle: "Schedule maintenance and forecast energy consumption using
+AI and machine learning on your live operational data."
 
-Include a "Run Optimization" button that when clicked:
-1. Finds all overdue and upcoming (next 30 days) work orders
-2. Gets technician availability by facility and specialization
-3. Gets equipment criticality and estimated hours per work order
-4. Uses linear programming to schedule work orders across available
-   technicians, minimizing total downtime risk (weighted by equipment
-   criticality and days overdue)
-5. Respects constraints: technicians can only work on equipment at
-   their facility, one job at a time, max 10 hours per day
+At the top of the tab, add a mode selector using radio buttons:
+- "Maintenance Scheduler"
+- "Energy Forecaster"
 
-Show the results as:
-- A headline number: work orders scheduled and estimated days to
-  clear the backlog
-- A Gantt-style table: Technician, Equipment, Work Order, Scheduled Date,
-  Estimated Hours, Priority
-- A before/after comparison of overdue equipment count
+---
+
+MODE 1: Maintenance Scheduler
+
+When this mode is selected, show the following controls in a row above
+the results (not in a sidebar):
+- A multi-select for Facility (options from FACILITIES table, plus "All")
+- A segmented button for Time Horizon: 7 days / 14 days / 30 days
+- A slider labeled "Priority" with left end "Minimize Downtime Risk" and
+  right end "Minimize Labor Cost" (0-100 range)
+- A steel blue "Run Optimizer" button
+
+When the button is clicked:
+1. Pull overdue and upcoming work orders for the selected facilities
+   within the selected time horizon from WORK_ORDERS and EQUIPMENT
+2. Pull technician availability and specialization from TECHNICIANS
+3. Use linear programming (scipy) to assign work orders to technicians,
+   weighted by the priority slider (0 = weight by criticality and overdue
+   days, 100 = weight by technician hourly rate)
+4. Respect constraints: same facility only, one job at a time,
+   max 10 hours per technician per day
+
+Display results as:
+- Three KPI cards: Work Orders Scheduled, Days to Clear Backlog,
+  Total Labor Hours
+- A plotly Gantt chart (px.timeline) with:
+  - Y-axis: technician names
+  - X-axis: scheduled dates
+  - Bars colored by equipment criticality using the status palette
+    (green=#16A34A for Low, amber=#D97706 for Medium,
+    orange=#F97316 for High, red=#DC2626 for Critical)
+  - Hover tooltip showing: equipment name, work order type, estimated hours
+- A before/after comparison: overdue count before vs after the schedule
+
+---
+
+MODE 2: Energy Forecaster
+
+When this mode is selected, show the following controls:
+- A dropdown to select Facility (from FACILITIES table)
+- Radio buttons for Forecast Horizon: 1 month / 2 months / 3 months
+- A steel blue "Generate Forecast" button
+
+When the button is clicked:
+1. Pull monthly energy data from ENERGY_METERS for the selected facility,
+   converting the MONTH column (YYYY-MM format) to a proper DATE value
+2. Use SNOWFLAKE.ML.FORECAST to train a forecast model on the historical
+   ACTUAL_KWH values and predict the next N months (based on the selected
+   horizon). Run this as a SQL operation inside Snowflake.
+3. Retrieve the forecast results including the predicted value and the
+   upper/lower confidence interval bounds
+
+Display results as:
+- A headline KPI card: "Forecasted Monthly Cost" (forecasted kWh multiplied
+  by average historical COST_PER_KWH for the facility)
+- A plotly line chart with three series:
+  - Historical actual kWh (solid steel blue line, #2563EB)
+  - Historical budget kWh (dashed gray line, #94A3B8)
+  - Forecasted kWh (dotted line with a light blue shaded confidence band)
+  - X-axis: months, Y-axis: kWh consumed
+  - Legend positioned below the chart, white background
+- A "Budget Risk" table showing months where the forecast exceeds the
+  historical average budget by more than 10%, with columns:
+  Month, Forecasted kWh, Budget kWh, Variance %, Risk Level
+- A small note below: "Forecast based on [N] months of historical data.
+  Wider confidence intervals reflect limited history."
+
+---
+
+Apply the same styling as the rest of the app throughout this tab:
+white background, steel blue primary, plotly charts with white backgrounds,
+sentence case labels, no all-caps.
 
 Add scipy to the app's dependencies.
 ```
+

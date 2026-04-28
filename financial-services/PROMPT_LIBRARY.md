@@ -150,22 +150,47 @@ Test in AI & ML > Agents > FINSERV_AGENT Playground.
 
 ### 5.1 Chat Page
 ```
-Build a 3-page Streamlit app in Snowflake called FINSERV_ASSISTANT_APP
+Build a single-page Streamlit app in Snowflake called FINSERV_ASSISTANT_APP
 in FINSERV_HOL_DB.PORTFOLIO using FINSERV_HOL_WH.
 
-Start with page 1 -- "Chat" (the home page):
-- A sidebar with the title "Financial Services Assistant" and a brief description
-- A conversational chat interface connected to FINSERV_AGENT
-- Stream the agent's responses in real time as they arrive
-- When the agent returns data, display it as a table
+Use st.tabs() to create a horizontal tab bar at the top of the page
+with three tabs: "Chat", "Dashboard", and "Optimization". All three
+tabs should be visible and switchable at the top -- no sidebar page
+navigation.
+
+Start with the Chat tab:
+- A sidebar with the title "Portfolio Intelligence" and a brief description of the app
+- A chat interface where users can have a conversation with FINSERV_AGENT
+- Show the agent's responses in the chat as they arrive
+- When the agent returns data, display it as a table below the response
 - When the agent returns SQL, show it in a collapsible section
-- Keep the full conversation history visible as users scroll
-- Use claude-3-5-sonnet as the model
+- Keep the conversation history visible throughout the session
+
+Apply a premium financial services design throughout the app:
+- Main content background: white (#FFFFFF) with light gray panels (#F8FAFC)
+  and subtle card shadows -- clean and professional, not dark
+- Sidebar: deep navy (#0F172A) with white text and a gold left border on the
+  active page -- the sidebar is the only dark element
+- Primary color: deep navy (#0F172A) for headings and key text; gold (#B45309)
+  as a warm accent for section dividers, active states, and highlights
+- Typography: sentence case throughout -- no all-caps; use semibold weight for
+  headers, regular for body; confident and readable, not aggressive
+- Data tables: white background, light gray dividers, numbers right-aligned;
+  gains in green (#16A34A), losses in red (#DC2626); clean and data-dense
+- KPI cards: white background with a gold top border, large bold number in
+  dark navy (#0F172A), small gray label -- premium but not garish
+- Charts: white background with deep navy as the primary series color and gold
+  as the secondary -- consistent with the rest of the app
+- Chat input area: white background matching the main content -- seamlessly
+  part of the page, not a floating element
+- Overall feel: a premium wealth management portal -- authoritative, polished,
+  and trustworthy; think a private bank client dashboard, not a trading terminal
+
 ```
 
 ### 5.2 Dashboard Page
 ```
-Add a second page to FINSERV_ASSISTANT_APP called "Dashboard".
+Fill in the Dashboard tab of FINSERV_ASSISTANT_APP with the following content.
 
 This page should show live data from FINSERV_HOL_DB:
 
@@ -186,32 +211,91 @@ BOTTOM ROW - a compliance alerts table:
   Severity, Description, Days Open
 - Sort by severity (Critical > High > Medium > Low)
 - Include a button to download the table as a CSV
+
+Chart styling:
+Use plotly for all charts. Color palette: deep navy (#0F172A) as the primary series color, warm gold (#B45309) as the secondary. Use green (#16A34A) for gains/positive and red (#DC2626) for losses/negative. All chart backgrounds should be white (#FFFFFF) with light gray grid lines. No dark backgrounds on any chart.
+Position the legend below each chart (orientation="h", y=-0.3) to prevent overlap with chart titles. Add a top margin (t=50) on all charts so the title never crowds the plot area.
 ```
 
 ### 5.3 Optimization Page
 ```
-Add a third page to FINSERV_ASSISTANT_APP called "Optimization".
+Fill in the Optimization tab of FINSERV_ASSISTANT_APP with the following content.
 
-Title: "Portfolio Rebalancing Optimizer"
-Subtitle: "Identify concentrated positions and generate trade
-recommendations to bring portfolios back within risk limits."
+Title: "Portfolio Intelligence"
+Subtitle: "Rebalance portfolios and forecast risk exposure using
+AI and machine learning on your live portfolio data."
 
-Include a "Run Optimization" button that when clicked:
-1. Finds all holdings where POSITION_PCT > 15 (concentrated positions)
-2. Calculates the target allocation to reduce concentration below 15%
-3. Identifies which securities to sell (reduce concentrated ones) and
-   which to buy (increase diversification based on client risk tolerance)
-4. Uses linear programming to minimize trading costs while meeting
-   all concentration and risk constraints
+At the top of the tab, add a mode selector using radio buttons:
+- "Rebalancing Optimizer"
+- "Risk Forecaster"
 
-Show the results as:
-- A headline number: how many accounts need rebalancing and total
-  notional trade value
-- A table of recommended sells: Account, Security, Current %, Target %,
+---
+
+MODE 1: Rebalancing Optimizer
+
+Show the following controls in a row above the results:
+- A dropdown for Advisor (from ADVISORS table, plus "All advisors")
+- A slider for Concentration Limit: 5% to 25% (default 15%)
+- A multi-select for Risk Tolerance Filter: Conservative / Moderate / Aggressive
+- A steel blue "Run Optimizer" button
+
+When clicked:
+1. Pulls holdings from HOLDINGS filtered by the selected advisor and
+   risk tolerance, finding positions where POSITION_PCT exceeds the limit
+2. Uses linear programming (scipy) to generate sell/buy recommendations
+   that bring each account back within the selected concentration limit
+   while minimizing total notional trade value (fewest trades possible)
+3. Respects client risk tolerance: Conservative accounts only receive
+   fixed income buy suggestions, Aggressive accounts allow equity
+
+Display results as:
+- Three KPI cards: Accounts Needing Rebalancing, Total Notional Trade
+  Value, Estimated Compliance Alerts Resolved
+- A plotly treemap showing current portfolio allocation by asset class
+  across all selected accounts -- cells colored red where concentration
+  exceeds the limit, green where within limits
+- A recommended sells table: Account, Security, Current %, Target %,
   Shares to Sell, Estimated Proceeds
-- A table of recommended buys: Account, Security, Shares to Buy,
+- A recommended buys table: Security, Asset Class, Shares to Buy,
   Estimated Cost, Rationale
-- A before/after bar chart showing position concentration per account
+- Apply the app styling: white background, navy/gold palette,
+  plotly white chart backgrounds
+
+---
+
+MODE 2: Risk Forecaster
+
+Show the following controls:
+- A dropdown for Account (from ACCOUNTS table, or "All accounts")
+- Radio buttons for Forecast Horizon: 30 days / 60 days / 90 days
+- A steel blue "Generate Forecast" button
+
+When clicked:
+1. Pull historical risk scores from RISK_SCORES joined with ACCOUNTS,
+   converting ASSESSMENT_DATE to a time series
+2. Use SNOWFLAKE.ML.FORECAST to predict the portfolio risk score trajectory
+   over the selected horizon for the chosen account(s)
+3. Retrieve forecast values with upper and lower confidence bounds
+
+Display results as:
+- A headline KPI card: "Forecasted Risk Score" at end of horizon,
+  with an arrow and color indicator (green if decreasing, red if increasing)
+- A plotly line chart with:
+  - Historical risk score (solid navy line, #0F172A)
+  - The high-risk threshold line (dashed red at 0.8)
+  - Forecasted risk score (dotted line with light gold confidence band)
+  - X-axis: dates, Y-axis: risk score (0.0 to 1.0)
+  - Legend below the chart, white background
+- A risk outlook table: Account Name, Current Score, Forecasted Score,
+  Trend, Recommended Action (Reduce Equity / Hold / Review with Client)
+- A small note: "Forecast based on [N] assessment periods of historical
+  data. Confidence intervals widen with shorter history."
+
+---
+
+Apply the same styling as the rest of the app throughout:
+white background, deep navy sidebar (#0F172A), gold accent (#B45309),
+plotly white chart backgrounds, sentence case, no all-caps.
 
 Add scipy to the app's dependencies.
 ```

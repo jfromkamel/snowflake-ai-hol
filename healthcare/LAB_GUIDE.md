@@ -31,9 +31,9 @@ Your instructor will provide you with trial account credentials. Open your brows
 
 ### 0.2 Open Cortex Code
 
-1. In the left navigation bar, click **Projects**
-2. Click **Cortex Code**
-3. You should see the Cortex Code IDE with a chat panel on the right
+1. Look for the **Cortex Code icon** in the **lower-right corner** of Snowsight
+2. Click it -- the Cortex Code panel will open on the right side of the screen
+3. You should see a chat input box at the bottom of the panel
 
 > **What is Cortex Code?** Cortex Code is Snowflake's AI-powered IDE. You can ask it to write SQL, create objects, build applications, and more -- all through natural language conversation. Think of it as your AI pair programmer that understands Snowflake natively.
 

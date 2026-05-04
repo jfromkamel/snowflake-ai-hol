@@ -29,18 +29,7 @@ Your instructor will provide you with trial account credentials. Open your brows
 1. Enter your **username** and **password**
 2. You should land on the Snowsight home page
 
-### 0.2 Enable Cortex AI
-
-Before running any prompts, enable cross-region Cortex AI so all AI features work correctly. Go to **Snowsight > Admin > Worksheets** (or open any SQL worksheet) and run:
-
-```sql
-USE ROLE ACCOUNTADMIN;
-ALTER ACCOUNT SET CORTEX_ENABLED_CROSS_REGION = 'ANY_REGION';
-```
-
-> **What this does:** Allows Snowflake to route AI workloads to the best available region when a model is not available in your current region. Required for Cortex Code, Cortex Analyst, Cortex Search, and Snowflake Intelligence to work reliably on trial accounts.
-
-### 0.3 Open Cortex Code
+### 0.2 Open Cortex Code
 
 1. Look for the **Cortex Code icon** in the **lower-right corner** of Snowsight
 2. Click it -- the Cortex Code panel will open on the right side of the screen
@@ -48,7 +37,16 @@ ALTER ACCOUNT SET CORTEX_ENABLED_CROSS_REGION = 'ANY_REGION';
 
 > **What is Cortex Code?** Cortex Code is Snowflake's AI-powered IDE. You can ask it to write SQL, create objects, build applications, and more -- all through natural language conversation. Think of it as your AI pair programmer that understands Snowflake natively.
 
-### 0.4 Connect to the Lab's GitHub Repository
+> **Troubleshooting:** If Cortex Code shows a model availability error, you need to enable cross-region inference. Go to **Projects > Workspaces**, open a new SQL file, and run:
+>
+> ```sql
+> USE ROLE ACCOUNTADMIN;
+> ALTER ACCOUNT SET CORTEX_ENABLED_CROSS_REGION = 'ANY_REGION';
+> ```
+>
+> This allows Snowflake to route AI workloads to the best available region. After running this, close the SQL file and try Cortex Code again.
+
+### 0.3 Connect to the Lab's GitHub Repository
 
 Instead of downloading any files, you'll connect Snowflake directly to the public GitHub repository that contains all the lab materials. Snowflake can read and execute files straight from GitHub -- no ZIP files, no uploads.
 
@@ -75,7 +73,7 @@ use it as a file source during this lab.
 
 > **Note:** This is the only prompt in the lab that requires ACCOUNTADMIN. Cortex Code will handle the role switching automatically.
 
-### Fallback SQL for Step 0.4
+### Fallback SQL for Step 0.3
 
 If Cortex Code can't handle the Git setup, run this SQL directly in a Snowsight worksheet:
 
@@ -95,7 +93,7 @@ LS @HOL_UTILS.PUBLIC.SNOWFLAKE_AI_HOL_REPO/branches/main/;
 ```
 
 
-### 0.5 Browse Lab Files in a Workspace
+### 0.4 Browse Lab Files in a Workspace
 
 Now that Snowflake is connected to GitHub, create a visual workspace to browse the repo files:
 

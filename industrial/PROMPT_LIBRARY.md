@@ -14,9 +14,10 @@ all tables, internal stages, and load all sample data:
 
 @HOL_UTILS.PUBLIC.SNOWFLAKE_AI_HOL_REPO/branches/main/industrial/scripts/setup.sql
 
-Use EXECUTE IMMEDIATE FROM to run it. After execution, show me
-a summary table of every table created with its schema and row
-count so I can confirm everything loaded correctly.
+Use EXECUTE IMMEDIATE FROM to run it. After execution, set
+INDUSTRIAL_HOL_WH as the active warehouse for the rest of our session
+and show me a summary table of every table created with its schema and
+row count so I can confirm everything loaded correctly.
 ```
 
 ### 1.1 Fallback Prompt
@@ -42,7 +43,7 @@ clean summary table.
 
 ### 2.1 Primary Prompt
 ```
-Set up Cortex Analyst for the operations data in
+Create a Cortex Analyst semantic view for the operations data in
 INDUSTRIAL_HOL_DB.OPERATIONS.
 
 Include these tables: FACILITIES, PRODUCTION_LINES, TECHNICIANS,
@@ -61,8 +62,10 @@ Make sure it can answer questions like:
 3. "Show me all unplanned downtime events this quarter"
 4. "Which production lines have the highest defect rates?"
 
-Name the model EQUIPMENT_ANALYTICS and store it in
+Name it EQUIPMENT_ANALYTICS and store it in
 INDUSTRIAL_HOL_DB.OPERATIONS.
+Register it directly as a semantic view without saving any intermediate
+files to a stage.
 ```
 
 ### 2.1 Fallback Prompt
@@ -77,19 +80,33 @@ Use COPY FILES INTO to transfer it.
 
 ### 2.2 Energy Model
 ```
-Set up Cortex Analyst for energy data using the pre-built YAML model in
-our GitHub repository at:
+Create a Cortex Analyst semantic view for energy consumption analytics.
 
-@HOL_UTILS.PUBLIC.SNOWFLAKE_AI_HOL_REPO/branches/main/industrial/scripts/semantic_models/ENERGY_CONSUMPTION_MODEL.yaml
+Include these tables:
+- INDUSTRIAL_HOL_DB.ENERGY.ENERGY_METERS
+- INDUSTRIAL_HOL_DB.OPERATIONS.FACILITIES
 
-Note: the YAML file can't be read directly from the Git stage. Instead,
-read the file contents from the stage and use
-SYSTEM$CREATE_SEMANTIC_VIEW_FROM_YAML to register it as a semantic view
-in INDUSTRIAL_HOL_DB.OPERATIONS.
+Join ENERGY_METERS to FACILITIES on FACILITY_ID.
+
+Business intelligence rules:
+- Flag "over budget" when ACTUAL_KWH > BUDGETED_KWH * 1.2
+- Calculate budget variance as (ACTUAL_KWH - BUDGETED_KWH) / BUDGETED_KWH
+- Track peak demand from PEAK_DEMAND_KW
+
+Make sure it can answer questions like:
+1. "Which facilities are over their energy budget?"
+2. "What is the total energy cost by facility this year?"
+3. "Show me peak demand trends by energy type"
+4. "Which meters have the highest budget variance?"
+
+Name it ENERGY_CONSUMPTION and store it in INDUSTRIAL_HOL_DB.ENERGY.
+Register it directly as a semantic view without saving any intermediate
+files to a stage.
 ```
 
-### 2.3 Inspect -- Snowsight UI
-Guide attendees to AI & ML > Analyst to test EQUIPMENT_ANALYTICS.
+### 2.3 Explore -- Snowsight UI
+Guide attendees to Cortex > Analyst. Select INDUSTRIAL_HOL_DB > OPERATIONS > EQUIPMENT_ANALYTICS.
+Ask a question, then click "Add to Verified Queries". Walk through the semantic view tour: Custom Instructions, Logical Tables, Relationships, Verified Queries, Suggestions.
 
 ---
 

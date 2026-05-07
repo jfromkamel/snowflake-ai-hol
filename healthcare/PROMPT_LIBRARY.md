@@ -14,8 +14,9 @@ internal stages, and load all sample data:
 
 @HOL_UTILS.PUBLIC.SNOWFLAKE_AI_HOL_REPO/branches/main/healthcare/scripts/setup.sql
 
-Use EXECUTE IMMEDIATE FROM to run it. After execution, give me a brief
-summary of what was created.
+Use EXECUTE IMMEDIATE FROM to run it. After execution, set
+HEALTHCARE_HOL_WH as the active warehouse for the rest of our session
+and give me a brief summary of what was created.
 ```
 
 ### 1.1 Fallback Prompt
@@ -41,7 +42,8 @@ clean summary table.
 
 ### 2.1 Primary Prompt
 ```
-Set up Cortex Analyst for the clinical data in HEALTHCARE_HOL_DB.CLINICAL.
+Create a Cortex Analyst semantic view for the clinical data in
+HEALTHCARE_HOL_DB.CLINICAL.
 
 Include these tables: PATIENTS, PROVIDERS, DEPARTMENTS, ENCOUNTERS,
 DIAGNOSES, PROCEDURES, MEDICATIONS, LAB_RESULTS, BEDS, and READMISSIONS.
@@ -57,7 +59,9 @@ Make sure it can answer questions like:
 3. "Which patients are at high risk for readmission?"
 4. "Show me all critical lab results"
 
-Name the model PATIENT_CARE and store it in HEALTHCARE_HOL_DB.CLINICAL.
+Name it PATIENT_CARE and store it in HEALTHCARE_HOL_DB.CLINICAL.
+Register it directly as a semantic view without saving any intermediate
+files to a stage.
 ```
 
 ### 2.1 Fallback Prompt
@@ -73,19 +77,35 @@ Use COPY FILES INTO to transfer it.
 
 ### 2.2 Claims Model
 ```
-Set up Cortex Analyst for insurance claims data using the pre-built YAML
-model in our GitHub repository at:
+Create a Cortex Analyst semantic view for insurance claims analytics.
 
-@HOL_UTILS.PUBLIC.SNOWFLAKE_AI_HOL_REPO/branches/main/healthcare/scripts/semantic_models/CLAIMS_ANALYTICS_MODEL.yaml
+Include these tables:
+- HEALTHCARE_HOL_DB.OPERATIONS.INSURANCE_CLAIMS
+- HEALTHCARE_HOL_DB.CLINICAL.PATIENTS
+- HEALTHCARE_HOL_DB.CLINICAL.ENCOUNTERS
 
-Note: the YAML file can't be read directly from the Git stage. Instead,
-read the file contents from the stage and use
-SYSTEM$CREATE_SEMANTIC_VIEW_FROM_YAML to register it as a semantic view
-in HEALTHCARE_HOL_DB.CLINICAL.
+Join INSURANCE_CLAIMS to PATIENTS on PATIENT_ID, and to ENCOUNTERS
+on ENCOUNTER_ID.
+
+Business intelligence rules:
+- Flag "claim denied" when STATUS = 'Denied'
+- Calculate approval rate as percentage of claims with STATUS = 'Approved'
+- Calculate average reimbursement as APPROVED_AMOUNT / CLAIM_AMOUNT
+
+Make sure it can answer questions like:
+1. "What is the total claim amount by insurance type?"
+2. "Which claims were denied?"
+3. "What is the approval rate by department?"
+4. "Show average reimbursement percentage by insurance type"
+
+Name it CLAIMS_ANALYTICS and store it in HEALTHCARE_HOL_DB.CLINICAL.
+Register it directly as a semantic view without saving any intermediate
+files to a stage.
 ```
 
-### 2.3 Inspect -- Snowsight UI
-Guide attendees to AI & ML > Analyst to test the PATIENT_CARE semantic model.
+### 2.3 Explore -- Snowsight UI
+Guide attendees to Cortex > Analyst. Select HEALTHCARE_HOL_DB > CLINICAL > PATIENT_CARE.
+Ask a question, then click "Add to Verified Queries". Walk through the semantic view tour: Custom Instructions, Logical Tables, Relationships, Verified Queries, Suggestions.
 
 ---
 

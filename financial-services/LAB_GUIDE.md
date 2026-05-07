@@ -6,28 +6,42 @@
 
 ### About This Lab
 
-In this hands-on lab, you will build a fully functional AI-powered Portfolio Intelligence using **only natural language prompts** in Snowflake's Cortex Code IDE. No SQL writing, no YAML editing, no manual UI configuration -- you'll talk to Cortex Code and it will build everything for you.
+In this hands-on lab, you will build a fully functional AI-powered Portfolio Intelligence using **only natural language prompts** in Snowflake's AI-powered development platform, **Cortex Code**. No SQL writing, no YAML editing, no manual UI configuration -- you'll talk to Cortex Code and it will build everything for you.
 
 **What you'll build:**
-- A portfolio database with clients, holdings, risk scores, and compliance alerts
-- Semantic models that let anyone query portfolio data in plain English
-- A search engine over risk management documentation
-- A Snowflake Intelligence Agent that routes questions to the right data source
-- A multi-page Streamlit app with chat, dashboards, and portfolio rebalancing
+
+<table style="border: none; width: 100%; font-size: 8pt; line-height: 1.1;">
+<tr><td style="border: none; padding: 2px 8px; width: 25%;"><b>1. Portfolio Database</b></td><td style="border: none; padding: 2px 8px;">Clients, holdings, risk scores, and compliance alerts</td></tr>
+<tr><td style="border: none; padding: 2px 8px;"><b>2. Cortex Analyst</b></td><td style="border: none; padding: 2px 8px;">Ask questions in plain English, get SQL results instantly</td></tr>
+<tr><td style="border: none; padding: 2px 8px;"><b>3. Cortex Search</b></td><td style="border: none; padding: 2px 8px;">Natural language search across risk management documents</td></tr>
+<tr><td style="border: none; padding: 2px 8px;"><b>4. Intelligence Agent</b></td><td style="border: none; padding: 2px 8px;">AI orchestrator that routes queries to the right tool automatically</td></tr>
+<tr><td style="border: none; padding: 2px 8px;"><b>5. Streamlit App</b></td><td style="border: none; padding: 2px 8px;">Chat interface, live dashboards, and portfolio rebalancing</td></tr>
+</table>
 
 **Time:** 75 minutes hands-on
 **Prerequisites:** A laptop with a modern browser. No coding experience required. No files to download -- everything comes directly from GitHub.
 
 ---
 
+<img src="architecture_overview.png" alt="Architecture Overview" />
+
+---
+
 ## Step 0: Get Started (8 minutes)
 
-### 0.1 Log Into Your Snowflake Trial Account
+### 0.1 Create and Log Into Your Snowflake Trial Account
 
-Your instructor will provide you with trial account credentials. Open your browser and navigate to the Snowflake login URL provided.
+A shared URL will be provided to sign up for a Snowflake trial account.
 
-1. Enter your **username** and **password**
-2. You should land on the Snowsight home page
+1. Navigate to the **signup URL** provided by your instructor
+2. Ensure **"AI Data Cloud for Enterprise"** is selected (see screenshot below)
+3. Fill out the registration form with your details
+4. Click **Continue** and complete the signup process
+5. Check your email for a confirmation from Snowflake
+6. Follow the instructions in the email to activate your account and set your password
+7. Log in to your new Snowflake trial account — you should land on the **Snowsight** home page
+
+<img src="trial_signup.png" alt="Snowflake Trial Signup" />
 
 ### 0.2 Open Cortex Code
 
@@ -35,16 +49,7 @@ Your instructor will provide you with trial account credentials. Open your brows
 2. Click it -- the Cortex Code panel will open on the right side of the screen
 3. You should see a chat input box at the bottom of the panel
 
-> **What is Cortex Code?** Cortex Code is Snowflake's AI-powered IDE. You can ask it to write SQL, create objects, build applications, and more -- all through natural language conversation. Think of it as your AI pair programmer that understands Snowflake natively.
-
-> **Troubleshooting:** If Cortex Code shows a model availability error, you need to enable cross-region inference. Go to **Projects > Workspaces**, open a new SQL file, and run:
->
-> ```sql
-> USE ROLE ACCOUNTADMIN;
-> ALTER ACCOUNT SET CORTEX_ENABLED_CROSS_REGION = 'ANY_REGION';
-> ```
->
-> This allows Snowflake to route AI workloads to the best available region. After running this, close the SQL file and try Cortex Code again.
+> **What is Cortex Code?** Cortex Code is Snowflake's AI-powered development platform. You can ask it to write SQL, create objects, build applications, and more -- all through natural language conversation. Think of it as your AI pair programmer that understands Snowflake natively.
 
 ### 0.3 Connect to the Lab's GitHub Repository
 
@@ -68,6 +73,10 @@ use it as a file source during this lab.
 ```
 
 > **What's happening:** Cortex Code is creating a live connection between your Snowflake account and the lab's GitHub repository. All scripts, models, and documents will be accessible directly from GitHub -- no manual file handling needed.
+
+> **Important -- "Always allow" permissions:** When Cortex Code tries to run a CREATE statement, you'll see a permission prompt asking whether to allow it. Click the **Allow** dropdown arrow and select **"Allow CREATE in this chat"**. Do the same for any subsequent permission prompts you encounter (e.g., ALTER, INSERT, etc.). This prevents you from having to manually approve every single statement for the rest of the lab.
+>
+> ![Always allow permission](permission.png)
 
 **Expected output:** In the Cortex Code response, you should see a folder listing including `healthcare/`, `financial-services/`, `industrial/`, and `README.md`.
 
@@ -118,6 +127,8 @@ In this step, you'll create a financial services database with clients, portfoli
 
 ### 1.1 Execute the Setup Script
 
+Copy and paste this prompt into Cortex Code:
+
 ```
 Please execute the setup script from the GitHub repository we connected.
 Run this file to create the financial services database, warehouse, all
@@ -125,9 +136,10 @@ tables, internal stages, and load all sample data:
 
 @HOL_UTILS.PUBLIC.SNOWFLAKE_AI_HOL_REPO/branches/main/financial-services/scripts/setup.sql
 
-Use EXECUTE IMMEDIATE FROM to run it. After execution, show me
-a summary table of every table created with its schema and row
-count so I can confirm everything loaded correctly.
+Use EXECUTE IMMEDIATE FROM to run it. After execution, set
+FINSERV_HOL_WH as the active warehouse for the rest of our session
+and show me a summary table of every table created with its schema and
+row count so I can confirm everything loaded correctly.
 ```
 
 > **What's happening:** The script creates:
@@ -138,16 +150,27 @@ count so I can confirm everything loaded correctly.
 
 > **Congratulations!** You just built an entire database without writing a single line of SQL.
 
+### 1.2 Explore Your New Database
+
+Take a moment to see what was created. In the left navigation, click **Databases** and expand **FINSERV_HOL_DB > PORTFOLIO > Tables**. Click on any table (e.g., **CLIENTS**) to see its details, columns, and a Cortex-generated description that automatically explains what the table contains.
+
+![Database Explorer](databsae explorer.png)
+
+> **Why this matters:** The Database Explorer gives you instant visibility into every object Cortex Code created -- table schemas, row counts, column types, and AI-generated descriptions -- without writing a single query.
+
 ---
 
 ## Step 2: Create the Semantic Layer (12 minutes)
 
 Cortex Analyst is Snowflake's text-to-SQL engine. Define your business metrics once -- then anyone can query portfolio data in plain English.
 
-### 2.1 Set Up Cortex Analyst for Portfolio Data
+### 2.1 Create a Cortex Analyst Semantic View for Portfolio Data
+
+Copy and paste this prompt into Cortex Code:
 
 ```
-Set up Cortex Analyst for the portfolio data in FINSERV_HOL_DB.PORTFOLIO.
+Create a Cortex Analyst semantic view for the portfolio data in
+FINSERV_HOL_DB.PORTFOLIO.
 
 Include these tables: ADVISORS, CLIENTS, ACCOUNTS, SECURITIES, HOLDINGS,
 TRANSACTIONS, and BENCHMARKS.
@@ -162,21 +185,43 @@ Make sure it can answer questions like:
 3. "Show me the top 10 holdings by unrealized P&L"
 4. "What is the YTD performance vs S&P 500 benchmark?"
 
-Name the model PORTFOLIO_ANALYTICS and store it in FINSERV_HOL_DB.PORTFOLIO.
+Name it PORTFOLIO_ANALYTICS and store it in FINSERV_HOL_DB.PORTFOLIO.
+Register it directly as a semantic view without saving any intermediate
+files to a stage.
 ```
 
-### 2.2 Add Risk Analytics to Cortex Analyst
+### 2.2 Create a Cortex Analyst Semantic View for Risk Analytics
+
+Copy and paste this prompt into Cortex Code:
 
 ```
-Set up Cortex Analyst for risk data using the pre-built YAML model in
-our GitHub repository at:
+Create a Cortex Analyst semantic view for market risk and compliance
+analytics.
 
-@HOL_UTILS.PUBLIC.SNOWFLAKE_AI_HOL_REPO/branches/main/financial-services/scripts/semantic_models/MARKET_RISK_MODEL.yaml
+Include these tables:
+- FINSERV_HOL_DB.RISK.RISK_SCORES
+- FINSERV_HOL_DB.RISK.COMPLIANCE_ALERTS
+- FINSERV_HOL_DB.PORTFOLIO.ACCOUNTS
+- FINSERV_HOL_DB.PORTFOLIO.CLIENTS
 
-Note: the YAML file can't be read directly from the Git stage. Instead,
-read the file contents from the stage and use
-SYSTEM$CREATE_SEMANTIC_VIEW_FROM_YAML to register it as a semantic view
-in FINSERV_HOL_DB.PORTFOLIO.
+Join RISK_SCORES to ACCOUNTS on ACCOUNT_ID, COMPLIANCE_ALERTS to
+ACCOUNTS on ACCOUNT_ID, and ACCOUNTS to CLIENTS on CLIENT_ID.
+
+Business intelligence rules:
+- Flag "high risk" when RISK_SCORE > 0.8
+- Flag "critical alert" when SEVERITY = 'Critical'
+- Flag "open alert" when STATUS = 'Open'
+- Calculate total Value at Risk (VaR) at 95% confidence from VAR_95
+
+Make sure it can answer questions like:
+1. "What is the total Value at Risk across all high-risk accounts?"
+2. "Show me all open compliance alerts by severity"
+3. "Which clients have the highest portfolio risk scores?"
+4. "What is the average Sharpe ratio by account type?"
+
+Name it MARKET_RISK and store it in FINSERV_HOL_DB.RISK.
+Register it directly as a semantic view without saving any intermediate
+files to a stage.
 ```
 
 ### 2.3 Explore Your Semantic Model in Snowsight
@@ -184,26 +229,36 @@ in FINSERV_HOL_DB.PORTFOLIO.
 Step out of Cortex Code for a moment -- let's see what you built in the Snowsight UI.
 
 **Navigate to the Analyst:**
-1. In the left navigation, click **AI & ML**
+
+1. In the left navigation, hover over the **Cortex** icon
 2. Click **Analyst**
-3. In the **Database** dropdown at the top, select **FINSERV_HOL_DB**
+3. In the **Database** dropdown at the top, select **FINSERV_HOL_DB**, then select the **PORTFOLIO** schema
 4. Find your **PORTFOLIO_ANALYTICS** semantic view in the list and click it to open it
 
 **Ask a question:**
+
 5. In the chat box, type: *"What is the total AUM by advisor region?"*
 6. Cortex Analyst generates SQL, runs it, and returns results -- all in one step
-7. Click **Show SQL** below the response to see the exact query it generated
+7. Click **Add to Verified Queries** below the response to save this as a verified query. Verified queries act as trusted reference answers that improve the model's accuracy over time.
 
-> **Why the SQL view matters:** This is the transparency layer that builds trust with technical stakeholders. They can verify the logic is correct without having to write the query themselves.
+**Explore your semantic view:**
 
-**See improvement suggestions:**
-8. Look for any **suggestions** that appear after your response -- these may flag ambiguous column names, missing joins, or recommend adding this as a verified query. This is how the semantic model gets smarter over time based on real usage.
+8. Click the back arrow to return to the semantic view detail page. Take a moment to explore:
+   - **Custom Instructions** -- business rules and context you provided (e.g., "concentrated position = POSITION_PCT > 15")
+   - **Logical Tables** -- the tables included in this model and their columns
+   - **Relationships** -- how tables are joined together
+   - **Verified Queries** -- saved question/SQL pairs (including the one you just added) that serve as reference examples
+   - **Suggestions** -- the model's recommendations for improving coverage
+
+> **Note:** The Analyst can answer *any* natural language question about the included tables -- not just verified ones. Verified queries simply improve accuracy by giving the model reference examples of correct SQL for common questions.
 
 **Ask a follow-up:**
+
 9. Now ask: *"Which clients have the highest unrealized gains?"*
 10. Notice the conversation maintains context -- this is a full dialogue, not isolated one-off queries.
 
 **Check the monitoring view:**
+
 11. Click the **Monitor** tab at the top of the Analyst UI
 12. You'll see a history of every question asked, the SQL generated, whether it succeeded, and user feedback. This is how data teams identify gaps in the semantic model and prioritize improvements.
 
@@ -223,6 +278,8 @@ This is what's commonly called **RAG (Retrieval Augmented Generation)** -- but y
 
 ### 3.1 Bring the PDF into Snowflake
 
+Copy and paste this prompt into Cortex Code:
+
 ```
 Bring the following PDF from our GitHub repository into
 FINSERV_HOL_DB.PORTFOLIO so we can make it searchable:
@@ -231,6 +288,8 @@ FINSERV_HOL_DB.PORTFOLIO so we can make it searchable:
 ```
 
 ### 3.2 Create the Search Service
+
+Copy and paste this prompt into Cortex Code:
 
 ```
 Create a Cortex Search service called RISK_DOCS_INFO in
@@ -261,7 +320,8 @@ Cortex Code will return a URL. Open it in a new browser tab to read the source d
 > **Why this matters:** Seeing the source document helps you understand why the search returns what it returns. You're not searching a black box -- the content is fully visible and auditable.
 
 **Navigate to the Search Playground:**
-1. In the left navigation, click **AI & ML**
+
+1. In the left navigation, hover over the **Cortex** icon
 2. Click **Cortex Search**
 3. In the **Database** dropdown, select **FINSERV_HOL_DB**
 4. Find **RISK_DOCS_INFO** in the list and click on it to open it
@@ -286,6 +346,8 @@ Cortex Code will return a URL. Open it in a new browser tab to read the source d
 ## Step 4: Build the Intelligence Agent (10 minutes)
 
 ### 4.1 Create the Agent
+
+Copy and paste this prompt into Cortex Code:
 
 ```
 Create a Snowflake Intelligence Agent named FINSERV_AGENT in
@@ -315,11 +377,11 @@ There are two separate places in Snowsight where your agent lives -- and they se
 
 ---
 
-**View 1: AI & ML > Agents (the admin view)**
+**View 1: Cortex > Agents (the admin view)**
 
 This is where developers and data engineers build and manage agents. Think of it as the control panel.
 
-1. In the left navigation, click **AI & ML**
+1. In the left navigation, hover over the **Cortex** icon
 2. Click **Agents**
 3. Find **FINSERV_AGENT** and click on it
 4. Open the **Tools** tab -- you'll see all 3 tools listed:
@@ -337,12 +399,12 @@ This is where developers and data engineers build and manage agents. Think of it
 
 This is what your business users actually see -- a polished, conversational interface built on top of the same agent.
 
-7. In the left navigation, look for **Snowflake Intelligence** (it appears as a standalone section, separate from AI & ML)
-8. If you don't see it, try navigating to **AI & ML > Snowflake Intelligence**
+7. In the left navigation, look for **Snowflake Intelligence** (it appears as a standalone section, separate from Cortex)
+8. If you don't see it, try navigating to **Cortex > Snowflake Intelligence**
 9. Select **FINSERV_AGENT** from the agent list
 10. You're now in the end-user chat interface
 
-**What's different here compared to AI & ML > Agents:**
+**What's different here compared to Cortex > Agents:**
 - Responses automatically render as **charts or tables** depending on the question type -- no configuration needed
 - Citations appear below answers, linking back to the exact data source or document passage
 - Conversations are **threaded** -- users can continue a conversation, branch off, or start fresh
@@ -396,6 +458,8 @@ In this step, you'll build a 3-page app:
 > **The big picture:** Snowflake Intelligence is a great out-of-the-box experience. Streamlit is how you build a product around the same intelligence layer -- and the REST API is how you take it everywhere else.
 
 ### 5.1 Create the Chat Page (8 minutes)
+
+Copy and paste this prompt into Cortex Code:
 
 ```
 Build a single-page Streamlit app in Snowflake called FINSERV_ASSISTANT_APP
@@ -464,6 +528,8 @@ Apply a premium financial services design throughout the app:
 
 ### 5.3 Add the Dashboard Tab (10 minutes)
 
+Copy and paste this prompt into Cortex Code:
+
 ```
 Fill in the Dashboard tab of FINSERV_ASSISTANT_APP with the following content.
 
@@ -493,6 +559,8 @@ Position the legend below each chart (orientation="h", y=-0.3) to prevent overla
 ```
 
 ### 5.4 Add the Optimization Tab (7 minutes)
+
+Copy and paste this prompt into Cortex Code:
 
 ```
 Fill in the Optimization tab of FINSERV_ASSISTANT_APP with the following content.

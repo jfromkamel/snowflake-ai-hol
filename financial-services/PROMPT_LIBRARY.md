@@ -14,8 +14,9 @@ tables, internal stages, and load all sample data:
 
 @HOL_UTILS.PUBLIC.SNOWFLAKE_AI_HOL_REPO/branches/main/financial-services/scripts/setup.sql
 
-Use EXECUTE IMMEDIATE FROM to run it. After execution, give me a brief
-summary of what was created.
+Use EXECUTE IMMEDIATE FROM to run it. After execution, set
+FINSERV_HOL_WH as the active warehouse for the rest of our session
+and give me a brief summary of what was created.
 ```
 
 ### 1.1 Fallback Prompt
@@ -40,7 +41,8 @@ FINSERV_HOL_DB.RISK with their row counts. Display as a clean summary table.
 
 ### 2.1 Primary Prompt
 ```
-Set up Cortex Analyst for the portfolio data in FINSERV_HOL_DB.PORTFOLIO.
+Create a Cortex Analyst semantic view for the portfolio data in
+FINSERV_HOL_DB.PORTFOLIO.
 
 Include these tables: ADVISORS, CLIENTS, ACCOUNTS, SECURITIES, HOLDINGS,
 TRANSACTIONS, and BENCHMARKS.
@@ -55,7 +57,9 @@ Make sure it can answer questions like:
 3. "Show me the top 10 holdings by unrealized P&L"
 4. "What is the YTD performance vs S&P 500 benchmark?"
 
-Name the model PORTFOLIO_ANALYTICS and store it in FINSERV_HOL_DB.PORTFOLIO.
+Name it PORTFOLIO_ANALYTICS and store it in FINSERV_HOL_DB.PORTFOLIO.
+Register it directly as a semantic view without saving any intermediate
+files to a stage.
 ```
 
 ### 2.1 Fallback Prompt
@@ -71,19 +75,38 @@ Use COPY FILES INTO to transfer it.
 
 ### 2.2 Risk Model
 ```
-Set up Cortex Analyst for risk data using the pre-built YAML model in
-our GitHub repository at:
+Create a Cortex Analyst semantic view for market risk and compliance
+analytics.
 
-@HOL_UTILS.PUBLIC.SNOWFLAKE_AI_HOL_REPO/branches/main/financial-services/scripts/semantic_models/MARKET_RISK_MODEL.yaml
+Include these tables:
+- FINSERV_HOL_DB.RISK.RISK_SCORES
+- FINSERV_HOL_DB.RISK.COMPLIANCE_ALERTS
+- FINSERV_HOL_DB.PORTFOLIO.ACCOUNTS
+- FINSERV_HOL_DB.PORTFOLIO.CLIENTS
 
-Note: the YAML file can't be read directly from the Git stage. Instead,
-read the file contents from the stage and use
-SYSTEM$CREATE_SEMANTIC_VIEW_FROM_YAML to register it as a semantic view
-in FINSERV_HOL_DB.PORTFOLIO.
+Join RISK_SCORES to ACCOUNTS on ACCOUNT_ID, COMPLIANCE_ALERTS to
+ACCOUNTS on ACCOUNT_ID, and ACCOUNTS to CLIENTS on CLIENT_ID.
+
+Business intelligence rules:
+- Flag "high risk" when RISK_SCORE > 0.8
+- Flag "critical alert" when SEVERITY = 'Critical'
+- Flag "open alert" when STATUS = 'Open'
+- Calculate total Value at Risk (VaR) at 95% confidence from VAR_95
+
+Make sure it can answer questions like:
+1. "What is the total Value at Risk across all high-risk accounts?"
+2. "Show me all open compliance alerts by severity"
+3. "Which clients have the highest portfolio risk scores?"
+4. "What is the average Sharpe ratio by account type?"
+
+Name it MARKET_RISK and store it in FINSERV_HOL_DB.RISK.
+Register it directly as a semantic view without saving any intermediate
+files to a stage.
 ```
 
-### 2.3 Inspect -- Snowsight UI
-Guide attendees to AI & ML > Analyst to test PORTFOLIO_ANALYTICS.
+### 2.3 Explore -- Snowsight UI
+Guide attendees to Cortex > Analyst. Select FINSERV_HOL_DB > PORTFOLIO > PORTFOLIO_ANALYTICS.
+Ask a question, then click "Add to Verified Queries". Walk through the semantic view tour: Custom Instructions, Logical Tables, Relationships, Verified Queries, Suggestions.
 
 ---
 

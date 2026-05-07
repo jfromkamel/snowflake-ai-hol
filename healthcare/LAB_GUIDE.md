@@ -6,28 +6,42 @@
 
 ### About This Lab
 
-In this hands-on lab, you will build a fully functional AI-powered Healthcare Intelligence using **only natural language prompts** in Snowflake's Cortex Code IDE. No SQL writing, no YAML editing, no manual UI configuration -- you'll talk to Cortex Code and it will build everything for you.
+In this hands-on lab, you will build a fully functional AI-powered Healthcare Intelligence using **only natural language prompts** in Snowflake's AI-powered development platform, **Cortex Code**. No SQL writing, no YAML editing, no manual UI configuration -- you'll talk to Cortex Code and it will build everything for you.
 
 **What you'll build:**
-- A clinical database with patient records, encounters, lab results, and more
-- Semantic models that let anyone query clinical data in plain English
-- A search engine over clinical documentation
-- A Snowflake Intelligence Agent that routes questions to the right data source
-- A multi-page Streamlit app with chat, dashboards, and bed optimization
+
+<table style="border: none; width: 100%; font-size: 8pt; line-height: 1.1;">
+<tr><td style="border: none; padding: 2px 8px; width: 25%;"><b>1. Clinical Database</b></td><td style="border: none; padding: 2px 8px;">Patient records, encounters, lab results, and more</td></tr>
+<tr><td style="border: none; padding: 2px 8px;"><b>2. Cortex Analyst</b></td><td style="border: none; padding: 2px 8px;">Ask questions in plain English, get SQL results instantly</td></tr>
+<tr><td style="border: none; padding: 2px 8px;"><b>3. Cortex Search</b></td><td style="border: none; padding: 2px 8px;">Natural language search across clinical PDFs and reports</td></tr>
+<tr><td style="border: none; padding: 2px 8px;"><b>4. Intelligence Agent</b></td><td style="border: none; padding: 2px 8px;">AI orchestrator that routes queries to the right tool automatically</td></tr>
+<tr><td style="border: none; padding: 2px 8px;"><b>5. Streamlit App</b></td><td style="border: none; padding: 2px 8px;">Chat interface, live dashboards, and bed optimization</td></tr>
+</table>
 
 **Time:** 75 minutes hands-on
 **Prerequisites:** A laptop with a modern browser. No coding experience required. No files to download -- everything comes directly from GitHub.
 
 ---
 
+<img src="architecture_overview.png" alt="Architecture Overview" />
+
+---
+
 ## Step 0: Get Started (8 minutes)
 
-### 0.1 Log Into Your Snowflake Trial Account
+### 0.1 Create and Log Into Your Snowflake Trial Account
 
-Your instructor will provide you with trial account credentials. Open your browser and navigate to the Snowflake login URL provided.
+A shared URL will be provided to sign up for a Snowflake trial account.
 
-1. Enter your **username** and **password**
-2. You should land on the Snowsight home page
+1. Navigate to the **signup URL** provided by your instructor
+2. Ensure **"AI Data Cloud for Enterprise"** is selected (see screenshot below)
+3. Fill out the registration form with your details
+4. Click **Continue** and complete the signup process
+5. Check your email for a confirmation from Snowflake
+6. Follow the instructions in the email to activate your account and set your password
+7. Log in to your new Snowflake trial account — you should land on the **Snowsight** home page
+
+<img src="trial_signup.png" alt="Snowflake Trial Signup" />
 
 ### 0.2 Open Cortex Code
 
@@ -35,16 +49,7 @@ Your instructor will provide you with trial account credentials. Open your brows
 2. Click it -- the Cortex Code panel will open on the right side of the screen
 3. You should see a chat input box at the bottom of the panel
 
-> **What is Cortex Code?** Cortex Code is Snowflake's AI-powered IDE. You can ask it to write SQL, create objects, build applications, and more -- all through natural language conversation. Think of it as your AI pair programmer that understands Snowflake natively.
-
-> **Troubleshooting:** If Cortex Code shows a model availability error, you need to enable cross-region inference. Go to **Projects > Workspaces**, open a new SQL file, and run:
->
-> ```sql
-> USE ROLE ACCOUNTADMIN;
-> ALTER ACCOUNT SET CORTEX_ENABLED_CROSS_REGION = 'ANY_REGION';
-> ```
->
-> This allows Snowflake to route AI workloads to the best available region. After running this, close the SQL file and try Cortex Code again.
+> **What is Cortex Code?** Cortex Code is Snowflake's AI-powered development platform. You can ask it to write SQL, create objects, build applications, and more -- all through natural language conversation. Think of it as your AI pair programmer that understands Snowflake natively.
 
 ### 0.3 Connect to the Lab's GitHub Repository
 
@@ -68,6 +73,10 @@ use it as a file source during this lab.
 ```
 
 > **What's happening:** Cortex Code is creating a live connection between your Snowflake account and the lab's GitHub repository. All scripts, models, and documents will be accessible directly from GitHub -- no manual file handling needed.
+
+> **Important -- "Always allow" permissions:** When Cortex Code tries to run a CREATE statement, you'll see a permission prompt asking whether to allow it. Click the **Allow** dropdown arrow and select **"Allow CREATE in this chat"**. Do the same for any subsequent permission prompts you encounter (e.g., ALTER, INSERT, etc.). This prevents you from having to manually approve every single statement for the rest of the lab.
+>
+> ![Always allow permission](permission.png)
 
 **Expected output:** In the Cortex Code response, you should see a folder listing including `healthcare/`, `financial-services/`, `industrial/`, and `README.md`.
 
@@ -118,6 +127,8 @@ In this step, you'll create a healthcare database with patient records, encounte
 
 ### 1.1 Execute the Setup Script
 
+Copy and paste this prompt into Cortex Code:
+
 ```
 Please execute the setup script from the GitHub repository we connected.
 Run this file to create the healthcare database, warehouse, all tables,
@@ -125,9 +136,10 @@ internal stages, and load all sample data:
 
 @HOL_UTILS.PUBLIC.SNOWFLAKE_AI_HOL_REPO/branches/main/healthcare/scripts/setup.sql
 
-Use EXECUTE IMMEDIATE FROM to run it. After execution, show me
-a summary table of every table created with its schema and row
-count so I can confirm everything loaded correctly.
+Use EXECUTE IMMEDIATE FROM to run it. After execution, set
+HEALTHCARE_HOL_WH as the active warehouse for the rest of our session
+and show me a summary table of every table created with its schema and
+row count so I can confirm everything loaded correctly.
 ```
 
 > **What's happening:** Cortex Code is pulling the setup script directly from GitHub and executing it. The script creates:
@@ -138,6 +150,14 @@ count so I can confirm everything loaded correctly.
 
 > **Congratulations!** You just built an entire database without writing a single line of SQL.
 
+### 1.2 Explore Your New Database
+
+Take a moment to see what was created. In the left navigation, click **Databases** and expand **HEALTHCARE_HOL_DB > CLINICAL > Tables**. Click on any table (e.g., **BEDS**) to see its details, columns, and a Cortex-generated description that automatically explains what the table contains.
+
+![Database Explorer](databsae explorer.png)
+
+> **Why this matters:** The Database Explorer gives you instant visibility into every object Cortex Code created -- table schemas, row counts, column types, and AI-generated descriptions -- without writing a single query.
+
 ---
 
 ## Step 2: Create the Semantic Layer (12 minutes)
@@ -146,12 +166,13 @@ Cortex Analyst is Snowflake's text-to-SQL engine. You define your business metri
 
 In this step, you'll have Cortex Code **set up Cortex Analyst** from scratch.
 
-### 2.1 Set Up Cortex Analyst for Clinical Data
+### 2.1 Create a Cortex Analyst Semantic View for Clinical Data
 
-This is the "wow" moment. Copy and paste this prompt:
+This is the "wow" moment. Copy and paste this prompt into Cortex Code:
 
 ```
-Set up Cortex Analyst for the clinical data in HEALTHCARE_HOL_DB.CLINICAL.
+Create a Cortex Analyst semantic view for the clinical data in
+HEALTHCARE_HOL_DB.CLINICAL.
 
 Include these tables: PATIENTS, PROVIDERS, DEPARTMENTS, ENCOUNTERS,
 DIAGNOSES, PROCEDURES, MEDICATIONS, LAB_RESULTS, BEDS, and READMISSIONS.
@@ -167,23 +188,42 @@ Make sure it can answer questions like:
 3. "Which patients are at high risk for readmission?"
 4. "Show me all critical lab results"
 
-Name the model PATIENT_CARE and store it in HEALTHCARE_HOL_DB.CLINICAL.
+Name it PATIENT_CARE and store it in HEALTHCARE_HOL_DB.CLINICAL.
+Register it directly as a semantic view without saving any intermediate
+files to a stage.
 ```
 
 > **What's happening:** Cortex Code is analyzing your table structures, understanding the clinical relationships, and configuring a complete text-to-SQL layer. This would normally take a data engineer hours to write manually.
 
-### 2.2 Add Insurance Claims to Cortex Analyst
+### 2.2 Create a Cortex Analyst Semantic View for Claims Analytics
+
+Copy and paste this prompt into Cortex Code:
 
 ```
-Set up Cortex Analyst for insurance claims data using the pre-built YAML
-model in our GitHub repository at:
+Create a Cortex Analyst semantic view for insurance claims analytics.
 
-@HOL_UTILS.PUBLIC.SNOWFLAKE_AI_HOL_REPO/branches/main/healthcare/scripts/semantic_models/CLAIMS_ANALYTICS_MODEL.yaml
+Include these tables:
+- HEALTHCARE_HOL_DB.OPERATIONS.INSURANCE_CLAIMS
+- HEALTHCARE_HOL_DB.CLINICAL.PATIENTS
+- HEALTHCARE_HOL_DB.CLINICAL.ENCOUNTERS
 
-Note: the YAML file can't be read directly from the Git stage. Instead,
-read the file contents from the stage and use
-SYSTEM$CREATE_SEMANTIC_VIEW_FROM_YAML to register it as a semantic view
-in HEALTHCARE_HOL_DB.CLINICAL.
+Join INSURANCE_CLAIMS to PATIENTS on PATIENT_ID, and to ENCOUNTERS
+on ENCOUNTER_ID.
+
+Business intelligence rules:
+- Flag "claim denied" when STATUS = 'Denied'
+- Calculate approval rate as percentage of claims with STATUS = 'Approved'
+- Calculate average reimbursement as APPROVED_AMOUNT / CLAIM_AMOUNT
+
+Make sure it can answer questions like:
+1. "What is the total claim amount by insurance type?"
+2. "Which claims were denied?"
+3. "What is the approval rate by department?"
+4. "Show average reimbursement percentage by insurance type"
+
+Name it CLAIMS_ANALYTICS and store it in HEALTHCARE_HOL_DB.CLINICAL.
+Register it directly as a semantic view without saving any intermediate
+files to a stage.
 ```
 
 ### 2.3 Explore Your Semantic Model in Snowsight
@@ -191,26 +231,36 @@ in HEALTHCARE_HOL_DB.CLINICAL.
 Step out of Cortex Code for a moment -- let's see what you built in the Snowsight UI.
 
 **Navigate to the Analyst:**
-1. In the left navigation, click **AI & ML**
+
+1. In the left navigation, hover over the **Cortex** icon
 2. Click **Analyst**
-3. In the **Database** dropdown at the top, select **HEALTHCARE_HOL_DB**
+3. In the **Database** dropdown at the top, select **HEALTHCARE_HOL_DB**, then select the **CLINICAL** schema
 4. Find your **PATIENT_CARE** semantic view in the list and click it to open it
 
 **Ask a question:**
+
 5. In the chat box, type: *"How many patients are currently admitted by department?"*
 6. Cortex Analyst generates SQL, runs it, and returns results -- all in one step
-7. Click **Show SQL** below the response to see the exact query it generated
+7. Click **Add to Verified Queries** below the response to save this as a verified query. Verified queries act as trusted reference answers that improve the model's accuracy over time.
 
-> **Why the SQL view matters:** This is the transparency layer that builds trust with technical stakeholders. They can verify the logic is correct without having to write the query themselves.
+**Explore your semantic view:**
 
-**See improvement suggestions:**
-8. Look for any **suggestions** that appear after your response -- these may flag ambiguous column names, missing joins, or recommend adding this as a verified query. This is how the semantic model gets smarter over time based on real usage.
+8. Click the back arrow to return to the semantic view detail page. Take a moment to explore:
+   - **Custom Instructions** -- business rules and context you provided (e.g., "high readmission risk = RISK_SCORE > 0.7")
+   - **Logical Tables** -- the tables included in this model and their columns
+   - **Relationships** -- how tables are joined together
+   - **Verified Queries** -- saved question/SQL pairs (including the one you just added) that serve as reference examples
+   - **Suggestions** -- the model's recommendations for improving coverage
+
+> **Note:** The Analyst can answer *any* natural language question about the included tables -- not just verified ones. Verified queries simply improve accuracy by giving the model reference examples of correct SQL for common questions.
 
 **Ask a follow-up:**
+
 9. Now ask: *"What is the average length of stay for cardiology patients?"*
 10. Notice the conversation maintains context -- this is a full dialogue, not isolated one-off queries.
 
 **Check the monitoring view:**
+
 11. Click the **Monitor** tab at the top of the Analyst UI
 12. You'll see a history of every question asked, the SQL generated, whether it succeeded, and user feedback. This is how data teams identify gaps in the semantic model and prioritize improvements.
 
@@ -230,6 +280,8 @@ This is what's commonly called **RAG (Retrieval Augmented Generation)** -- but y
 
 ### 3.1 Bring the PDF into Snowflake
 
+Copy and paste this prompt into Cortex Code:
+
 ```
 Bring the following PDF from our GitHub repository into
 HEALTHCARE_HOL_DB.CLINICAL so we can make it searchable:
@@ -238,6 +290,8 @@ HEALTHCARE_HOL_DB.CLINICAL so we can make it searchable:
 ```
 
 ### 3.2 Create the Search Service
+
+Copy and paste this prompt into Cortex Code:
 
 ```
 Create a Cortex Search service called CLINICAL_DOCS_INFO in
@@ -268,7 +322,8 @@ Cortex Code will return a URL. Open it in a new browser tab to read the source d
 > **Why this matters:** Seeing the source document helps you understand why the search returns what it returns. You're not searching a black box -- the content is fully visible and auditable.
 
 **Navigate to the Search Playground:**
-1. In the left navigation, click **AI & ML**
+
+1. In the left navigation, hover over the **Cortex** icon
 2. Click **Cortex Search**
 3. In the **Database** dropdown, select **HEALTHCARE_HOL_DB**
 4. Find **CLINICAL_DOCS_INFO** in the list and click on it to open it
@@ -295,6 +350,8 @@ Cortex Code will return a URL. Open it in a new browser tab to read the source d
 Now you'll wire everything together into a single AI agent that automatically routes questions to the right data source.
 
 ### 4.1 Create the Agent
+
+Copy and paste this prompt into Cortex Code:
 
 ```
 Create a Snowflake Intelligence Agent named HEALTHCARE_AGENT in
@@ -323,11 +380,11 @@ There are two separate places in Snowsight where your agent lives -- and they se
 
 ---
 
-**View 1: AI & ML > Agents (the admin view)**
+**View 1: Cortex > Agents (the admin view)**
 
 This is where developers and data engineers build and manage agents. Think of it as the control panel.
 
-1. In the left navigation, click **AI & ML**
+1. In the left navigation, hover over the **Cortex** icon
 2. Click **Agents**
 3. Find **HEALTHCARE_AGENT** and click on it
 4. Open the **Tools** tab -- you'll see all 3 tools listed:
@@ -345,12 +402,12 @@ This is where developers and data engineers build and manage agents. Think of it
 
 This is what your business users actually see -- a polished, conversational interface built on top of the same agent.
 
-7. In the left navigation, look for **Snowflake Intelligence** (it appears as a standalone section, separate from AI & ML)
-8. If you don't see it, try navigating to **AI & ML > Snowflake Intelligence**
+7. In the left navigation, look for **Snowflake Intelligence** (it appears as a standalone section, separate from Cortex)
+8. If you don't see it, try navigating to **Cortex > Snowflake Intelligence**
 9. Select **HEALTHCARE_AGENT** from the agent list
 10. You're now in the end-user chat interface
 
-**What's different here compared to AI & ML > Agents:**
+**What's different here compared to Cortex > Agents:**
 - Responses automatically render as **charts or tables** depending on the question type -- no configuration needed
 - Citations appear below answers, linking back to the exact data source or document passage
 - Conversations are **threaded** -- users can continue a conversation, branch off, or start fresh
@@ -406,6 +463,8 @@ In this step, you'll build a 3-page app:
 > **The big picture:** Snowflake Intelligence is a great out-of-the-box experience. Streamlit is how you build a product around the same intelligence layer -- and the REST API is how you take it everywhere else.
 
 ### 5.1 Create the Chat Page (8 minutes)
+
+Copy and paste this prompt into Cortex Code:
 
 ```
 Build a single-page Streamlit app in Snowflake called HEALTHCARE_ASSISTANT_APP
@@ -474,6 +533,8 @@ Apply a clean clinical design throughout the app:
 
 ### 5.3 Add the Dashboard Tab (10 minutes)
 
+Copy and paste this prompt into Cortex Code:
+
 ```
 Fill in the Dashboard tab of HEALTHCARE_ASSISTANT_APP with the following content.
 
@@ -503,6 +564,8 @@ Position the legend below each chart (orientation="h", y=-0.3) to prevent overla
 ```
 
 ### 5.4 Add the Optimization Tab (7 minutes)
+
+Copy and paste this prompt into Cortex Code:
 
 ```
 Fill in the Optimization tab of HEALTHCARE_ASSISTANT_APP with the following content.

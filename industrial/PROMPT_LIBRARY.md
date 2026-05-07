@@ -106,7 +106,7 @@ files to a stage.
 
 ### 2.3 Explore -- Snowsight UI
 Guide attendees to Cortex > Analyst. Select INDUSTRIAL_HOL_DB > OPERATIONS > EQUIPMENT_ANALYTICS.
-Ask a question, then click "Add to Verified Queries". Walk through the semantic view tour: Custom Instructions, Logical Tables, Relationships, Verified Queries, Suggestions.
+Open the Playground tab on the right-hand side and ask a question, then click "Add to Verified Queries". Click the Suggestions tab and click "Start Learning". While it learns, explore the other tabs: Custom Instructions, Logical Tables, Relationships, Verified Queries, Monitor.
 
 ---
 
@@ -141,7 +141,7 @@ INDUSTRIAL_HOL_DB.OPERATIONS.PDF_STAGE -- use an expiry of 3600 seconds.
 ```
 
 ### 3.4 Test Search -- Snowsight UI
-Guide attendees to AI & ML > Cortex Search to test MAINTENANCE_DOCS_INFO.
+Guide attendees to Cortex > Cortex Search. Select INDUSTRIAL_HOL_DB (might already be pre-selected). Find MAINTENANCE_DOCS_INFO and test it.
 
 ---
 
@@ -170,7 +170,7 @@ Give it three tools:
 ```
 
 ### 4.2/4.3 -- Snowsight UI
-Test in AI & ML > Agents > INDUSTRIAL_AGENT Playground.
+Navigate to Cortex > Agents > INDUSTRIAL_AGENT. Tools are listed on the left-hand side. Ask a couple questions in the chat panel, then open the Monitor tab and click a specific request to see metrics. Click "Preview in Snowflake Intelligence" in the upper-right to switch to the end-user experience. Test the 3 question types: structured data, charting, and document search.
 
 ---
 
@@ -180,6 +180,9 @@ Test in AI & ML > Agents > INDUSTRIAL_AGENT Playground.
 ```
 Build a single-page Streamlit app in Snowflake called INDUSTRIAL_ASSISTANT_APP
 in INDUSTRIAL_HOL_DB.OPERATIONS using INDUSTRIAL_HOL_WH.
+
+Use my workspace to create the Streamlit files directly for collaboration.
+Use streamlit==1.52.2 for chat features.
 
 Use st.tabs() to create a horizontal tab bar at the top of the page
 with three tabs: "Chat", "Dashboard", and "Optimization". All three
@@ -243,13 +246,18 @@ BOTTOM ROW - a critical alerts table:
 - Sort by criticality (Critical first) then days overdue
 - Include a button to download the table as a CSV
 
+INTERACTIVITY:
+- Add a facility filter dropdown at the top that filters all charts and the table
+- Add a priority multi-select filter for work orders
+- Make the bar chart bars clickable -- clicking a facility filters the alerts table to show only that facility's overdue equipment
+
 Chart styling:
 Use plotly for all charts. Use green (#16A34A), amber (#D97706), and red (#DC2626) to represent operational status (good/warning/critical). For non-status charts use steel blue (#2563EB) as the primary series color and slate gray (#64748B) as the secondary. All chart backgrounds should be white (#FFFFFF) with light gray grid lines. No dark backgrounds on any chart.
 Position the legend below each chart (orientation="h", y=-0.3) to prevent overlap with chart titles. Add a top margin (t=50) on all charts so the title never crowds the plot area.
 ```
 
 ### 5.3 Optimization Page
-```
+`
 Fill in the Optimization tab of INDUSTRIAL_ASSISTANT_APP with the following content.
 
 Title: "Operations Intelligence"
@@ -264,9 +272,15 @@ At the top of the tab, add a mode selector using radio buttons:
 
 MODE 1: Maintenance Scheduler
 
-When this mode is selected, show the following controls in a row above
-the results (not in a sidebar):
-- A multi-select for Facility (options from FACILITIES table, plus "All")
+DATA EXPLORATION (shown immediately when this mode is selected):
+- A facility filter dropdown (from FACILITIES table, plus "All")
+- A priority multi-select filter (Critical, High, Medium, Low)
+- A plotly bar chart showing current open work orders by facility,
+  color-coded by priority -- this updates in real-time as filters change
+- Below the chart, a data table showing the filtered work orders
+  (Equipment, Facility, Priority, Status, Days Overdue, Estimated Hours)
+
+OPTIMIZATION CONTROLS (below the data exploration):
 - A segmented button for Time Horizon: 7 days / 14 days / 30 days
 - A slider labeled "Priority" with left end "Minimize Downtime Risk" and
   right end "Minimize Labor Cost" (0-100 range)
@@ -293,14 +307,24 @@ Display results as:
     orange=#F97316 for High, red=#DC2626 for Critical)
   - Hover tooltip showing: equipment name, work order type, estimated hours
 - A before/after comparison: overdue count before vs after the schedule
+- A button to download the schedule as CSV
 
 ---
 
 MODE 2: Energy Forecaster
 
-When this mode is selected, show the following controls:
-- A dropdown to select Facility (from FACILITIES table)
-- Radio buttons for Forecast Horizon: 1 month / 2 months / 3 months
+DATA EXPLORATION (shown immediately when this mode is selected):
+- A facility filter dropdown (from FACILITIES table)
+- An energy type selector (Electric / Natural Gas if available)
+- A plotly line chart showing the last 18 months of historical
+  ACTUAL_KWH vs BUDGETED_KWH for the selected facility/meter,
+  updating as filters change. Use steel blue for actual, dashed gray
+  for budget.
+- Below the chart, a summary table of the filtered historical data
+  (Month, Budgeted kWh, Actual kWh, Variance %, Cost)
+
+FORECASTING CONTROLS (below the data exploration):
+- Radio buttons for Forecast Horizon: 3 months / 6 months
 - A steel blue "Generate Forecast" button
 
 When the button is clicked:
@@ -315,7 +339,7 @@ When the button is clicked:
 Display results as:
 - A headline KPI card: "Forecasted Monthly Cost" (forecasted kWh multiplied
   by average historical COST_PER_KWH for the facility)
-- A plotly line chart with three series:
+- A plotly line chart combining historical and forecast data:
   - Historical actual kWh (solid steel blue line, #2563EB)
   - Historical budget kWh (dashed gray line, #94A3B8)
   - Forecasted kWh (dotted line with a light blue shaded confidence band)
@@ -324,8 +348,7 @@ Display results as:
 - A "Budget Risk" table showing months where the forecast exceeds the
   historical average budget by more than 10%, with columns:
   Month, Forecasted kWh, Budget kWh, Variance %, Risk Level
-- A small note below: "Forecast based on [N] months of historical data.
-  Wider confidence intervals reflect limited history."
+- A button to download the forecast results as CSV
 
 ---
 
@@ -334,5 +357,5 @@ white background, steel blue primary, plotly charts with white backgrounds,
 sentence case labels, no all-caps.
 
 Add scipy to the app's dependencies.
-```
+`
 

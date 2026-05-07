@@ -105,7 +105,7 @@ files to a stage.
 
 ### 2.3 Explore -- Snowsight UI
 Guide attendees to Cortex > Analyst. Select HEALTHCARE_HOL_DB > CLINICAL > PATIENT_CARE.
-Ask a question, then click "Add to Verified Queries". Walk through the semantic view tour: Custom Instructions, Logical Tables, Relationships, Verified Queries, Suggestions.
+Open the Playground tab on the right-hand side and ask a question, then click "Add to Verified Queries". Click the Suggestions tab and click "Start Learning". While it learns, explore the other tabs: Custom Instructions, Logical Tables, Relationships, Verified Queries, Monitor.
 
 ---
 
@@ -134,7 +134,7 @@ To do this:
 ```
 
 ### 3.3 Test Search -- Snowsight UI
-Guide attendees to AI & ML > Search to test CLINICAL_DOCS_INFO.
+Guide attendees to Cortex > Cortex Search. Select HEALTHCARE_HOL_DB (might already be pre-selected). Find CLINICAL_DOCS_INFO and test it.
 
 ---
 
@@ -163,7 +163,7 @@ Give it three tools:
 ```
 
 ### 4.2/4.3 -- Snowsight UI
-Test in AI & ML > Agents > HEALTHCARE_AGENT Playground.
+Navigate to Cortex > Agents > HEALTHCARE_AGENT. Tools are listed on the left-hand side. Ask a couple questions in the chat panel, then open the Monitor tab and click a specific request to see metrics. Click "Preview in Snowflake Intelligence" in the upper-right to switch to the end-user experience. Test the 3 question types: structured data, charting, and document search.
 
 ---
 
@@ -173,6 +173,9 @@ Test in AI & ML > Agents > HEALTHCARE_AGENT Playground.
 ```
 Build a single-page Streamlit app in Snowflake called HEALTHCARE_ASSISTANT_APP
 in HEALTHCARE_HOL_DB.CLINICAL using HEALTHCARE_HOL_WH.
+
+Use my workspace to create the Streamlit files directly for collaboration.
+Use streamlit==1.52.2 for chat features.
 
 Use st.tabs() to create a horizontal tab bar at the top of the page
 with three tabs: "Chat", "Dashboard", and "Optimization". All three
@@ -234,30 +237,42 @@ BOTTOM ROW - a critical alerts table:
 - Sort by risk score descending (highest risk first)
 - Include a button to download the table as a CSV
 
+INTERACTIVITY:
+- Add a department filter dropdown at the top that filters all charts and the table
+- Add a risk score slider to adjust the threshold (default 0.7)
+- Make the bar chart bars clickable -- clicking a department filters the patient table to show only that department's high-risk patients
+
 Chart styling:
 Use plotly for all charts. Color palette: steel blue (#2563EB) as the primary series color, teal (#0D9488) as the secondary. Use green (#16A34A), amber (#D97706), red (#DC2626) for status-based coloring only. All chart backgrounds should be white (#FFFFFF) with light gray grid lines. No dark backgrounds on any chart.
 Position the legend below each chart (orientation="h", y=-0.3) to prevent overlap with chart titles. Add a top margin (t=50) on all charts so the title never crowds the plot area.
 ```
 
 ### 5.3 Optimization Page
-```
+`
 Fill in the Optimization tab of HEALTHCARE_ASSISTANT_APP with the following content.
 
 Title: "Clinical Intelligence"
-Subtitle: "Optimize bed allocation and forecast readmission risk using
+Subtitle: "Optimize bed allocation and forecast patient demand using
 AI and machine learning on your live clinical data."
 
 At the top of the tab, add a mode selector using radio buttons:
 - "Bed Optimizer"
-- "Readmission Risk Forecaster"
+- "Demand Forecaster"
 
 ---
 
 MODE 1: Bed Optimizer
 
-Show the following controls in a row above the results:
-- A multi-select for Department (options from DEPARTMENTS table, plus "All")
+DATA EXPLORATION (shown immediately when this mode is selected):
+- A department multi-select filter (from DEPARTMENTS table, plus "All")
 - A slider for Occupancy Alert Threshold: 60% to 95% (default 80%)
+- A plotly grouped bar chart showing current occupancy by department
+  (occupied vs available beds), with a horizontal reference line at the
+  threshold -- updates in real-time as filters change
+- Below the chart, a data table showing current bed status per department
+  (Department, Occupied, Available, Occupancy %, Status)
+
+OPTIMIZATION CONTROLS (below the data exploration):
 - A toggle: "Include patients nearing discharge (LOS > 5 days)"
 - A steel blue "Run Optimizer" button
 
@@ -274,40 +289,48 @@ Display results as:
 - Three KPI cards: Departments Over Threshold, Beds That Can Be Freed,
   Patients Flagged for Discharge Review
 - A plotly grouped bar chart showing before/after occupancy by department,
-  with a horizontal reference line at the selected threshold
+  with the threshold reference line
 - A recommended actions table: Patient ID, From Department, To Department,
   Bed Type, Reason -- sorted by urgency
-- Apply the app styling: white background, clinical blue/teal palette,
-  plotly white chart backgrounds
+- A button to download recommendations as CSV
 
 ---
 
-MODE 2: Readmission Risk Forecaster
+MODE 2: Demand Forecaster
 
-Show the following controls:
-- A dropdown for Department (from DEPARTMENTS table)
+DATA EXPLORATION (shown immediately when this mode is selected):
+- A department dropdown (from DEPARTMENTS table)
+- A date range slider to explore historical data (last 90 days)
+- A plotly line chart showing historical daily admissions and occupancy
+  from DAILY_CENSUS for the selected department, updating as filters
+  change. Use soft blue for admissions, teal for occupancy count.
+- Below the chart, a summary table of the filtered census data
+  (Date, Admissions, Discharges, Occupancy, Available Beds)
+
+FORECASTING CONTROLS (below the data exploration):
 - Radio buttons for Forecast Horizon: 7 days / 14 days / 30 days
 - A steel blue "Generate Forecast" button
 
 When clicked:
-1. Pull the daily count of high-risk patients (RISK_SCORE > 0.7) from
-   READMISSIONS joined with ENCOUNTERS, grouped by department and date
-2. Use SNOWFLAKE.ML.FORECAST to predict the number of high-risk patients
-   expected in that department over the selected horizon
+1. Pull daily census data from DAILY_CENSUS for the selected department
+2. Use SNOWFLAKE.ML.FORECAST to train a forecast model on the historical
+   ADMISSIONS values and predict the next N days (based on the selected
+   horizon). Run this as a SQL operation inside Snowflake.
 3. Retrieve forecast values with upper and lower confidence bounds
 
 Display results as:
-- A headline KPI card: "Patients at High Readmission Risk (Forecasted)"
-  for the selected horizon period
-- A plotly line chart with:
-  - Historical high-risk patient count (solid blue line, #2563EB)
-  - Forecasted count (dotted line with light blue confidence band)
+- A headline KPI card: "Forecasted Daily Admissions" (average over the
+  forecast horizon)
+- A plotly line chart combining historical and forecast:
+  - Historical admissions (solid blue line, #2563EB)
+  - Forecasted admissions (dotted line with light blue confidence band)
+  - Capacity threshold line (dashed red at available beds)
   - X-axis: dates, Y-axis: patient count
   - Legend below the chart, white background
-- A risk summary table: Date, Forecasted High-Risk Count, vs Current
-  Average, Change (% above/below baseline)
-- A small note: "Forecast based on [N] days of historical data.
-  Confidence intervals widen with shorter history."
+- A capacity risk table: dates where forecasted admissions + current
+  occupancy would exceed available beds, with columns:
+  Date, Forecasted Admissions, Projected Occupancy, Capacity, Risk Level
+- A button to download the forecast as CSV
 
 ---
 
@@ -316,4 +339,4 @@ white background, soft blue primary (#2563EB), teal accent (#0D9488),
 plotly white chart backgrounds, sentence case, no all-caps.
 
 Add scipy to the app's dependencies.
-```
+`

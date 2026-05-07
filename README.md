@@ -121,6 +121,6 @@ snowflake-ai-hol/
 
 ### Getting Started
 
-1. Pick a track and open its `LAB_GUIDE.md` -- Step 0 is included at the top
+1. Pick a track and open its `LAB_GUIDE.md` (PDF version provided for lab sessions)
 2. Follow Steps 0-5 in sequence
 3. SEs: read `SE_FACILITATION_GUIDE.md` for timing, troubleshooting, and talking points

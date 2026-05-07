@@ -1,4 +1,4 @@
-# Healthcare Track -- Cortex Code Hands-On Lab
+# Healthcare -- Cortex Code HOL
 
 ## Powered by Cortex Code
 
@@ -10,20 +10,18 @@ In this hands-on lab, you will build a fully functional AI-powered Healthcare In
 
 **What you'll build:**
 
-<table style="border: none; width: 100%; font-size: 8pt; line-height: 1.1;">
-<tr><td style="border: none; padding: 2px 8px; width: 25%;"><b>1. Clinical Database</b></td><td style="border: none; padding: 2px 8px;">Patient records, encounters, lab results, and more</td></tr>
-<tr><td style="border: none; padding: 2px 8px;"><b>2. Cortex Analyst</b></td><td style="border: none; padding: 2px 8px;">Ask questions in plain English, get SQL results instantly</td></tr>
-<tr><td style="border: none; padding: 2px 8px;"><b>3. Cortex Search</b></td><td style="border: none; padding: 2px 8px;">Natural language search across clinical PDFs and reports</td></tr>
-<tr><td style="border: none; padding: 2px 8px;"><b>4. Intelligence Agent</b></td><td style="border: none; padding: 2px 8px;">AI orchestrator that routes queries to the right tool automatically</td></tr>
-<tr><td style="border: none; padding: 2px 8px;"><b>5. Streamlit App</b></td><td style="border: none; padding: 2px 8px;">Chat interface, live dashboards, and bed optimization</td></tr>
-</table>
+1. **Clinical Database** -- Patient records, encounters, lab results, and more
+2. **Cortex Analyst** -- Ask questions in plain English, get SQL results instantly
+3. **Cortex Search** -- Natural language search across clinical PDFs and reports
+4. **Intelligence Agent** -- AI orchestrator that routes queries to the right tool automatically
+5. **Streamlit App** -- Chat interface, live dashboards, and bed optimization
 
 **Time:** 75 minutes hands-on
 **Prerequisites:** A laptop with a modern browser. No coding experience required. No files to download -- everything comes directly from GitHub.
 
 ---
 
-<img src="architecture_overview.png" alt="Architecture Overview" />
+![Architecture Overview](architecture_overview.png)
 
 ---
 
@@ -35,19 +33,22 @@ A shared URL will be provided to sign up for a Snowflake trial account.
 
 1. Navigate to the **signup URL** provided by your instructor
 2. Ensure **"AI Data Cloud for Enterprise"** is selected (see screenshot below)
-3. Fill out the registration form with your details
+3. Select **AWS** as the cloud provider and **US East (Virginia)** as the region
+4. Fill out the registration form with your details
 4. Click **Continue** and complete the signup process
 5. Check your email for a confirmation from Snowflake
 6. Follow the instructions in the email to activate your account and set your password
 7. Log in to your new Snowflake trial account — you should land on the **Snowsight** home page
 
-<img src="trial_signup.png" alt="Snowflake Trial Signup" />
+![Snowflake Trial Signup](trial_signup.png)
 
 ### 0.2 Open Cortex Code
 
-1. Look for the **Cortex Code icon** in the **lower-right corner** of Snowsight
+1. Look for the **Cortex Code icon** in the **lower-right corner** of Snowsight (see screenshot below)
 2. Click it -- the Cortex Code panel will open on the right side of the screen
 3. You should see a chat input box at the bottom of the panel
+
+![Cortex Code Icon](cortex_code_icon.png)
 
 > **What is Cortex Code?** Cortex Code is Snowflake's AI-powered development platform. You can ask it to write SQL, create objects, build applications, and more -- all through natural language conversation. Think of it as your AI pair programmer that understands Snowflake natively.
 
@@ -74,7 +75,7 @@ use it as a file source during this lab.
 
 > **What's happening:** Cortex Code is creating a live connection between your Snowflake account and the lab's GitHub repository. All scripts, models, and documents will be accessible directly from GitHub -- no manual file handling needed.
 
-> **Important -- "Always allow" permissions:** When Cortex Code tries to run a CREATE statement, you'll see a permission prompt asking whether to allow it. Click the **Allow** dropdown arrow and select **"Allow CREATE in this chat"**. Do the same for any subsequent permission prompts you encounter (e.g., ALTER, INSERT, etc.). This prevents you from having to manually approve every single statement for the rest of the lab.
+> **Important -- "Allow in this chat" permissions:** When Cortex Code tries to run a CREATE statement, you'll see a permission prompt asking whether to allow it. Click the **Allow** dropdown arrow and select **"Allow CREATE in this chat"**. Do the same for any subsequent permission prompts you encounter (e.g., ALTER, INSERT, etc.). This prevents you from having to manually approve every single statement for the rest of the lab.
 >
 > ![Always allow permission](permission.png)
 
@@ -82,41 +83,26 @@ use it as a file source during this lab.
 
 > **Note:** This is the only prompt in the lab that requires ACCOUNTADMIN. Cortex Code will handle the role switching automatically.
 
-### Fallback SQL for Step 0.3
-
-If Cortex Code can't handle the Git setup, run this SQL directly in a Snowsight worksheet:
-
-```sql
-USE ROLE ACCOUNTADMIN;
-CREATE DATABASE IF NOT EXISTS HOL_UTILS;
-CREATE SCHEMA IF NOT EXISTS HOL_UTILS.PUBLIC;
-CREATE OR REPLACE API INTEGRATION HOL_GITHUB_API
-  API_PROVIDER = git_https_api
-  API_ALLOWED_PREFIXES = ('https://github.com/jfromkamel/')
-  ENABLED = TRUE;
-CREATE OR REPLACE GIT REPOSITORY HOL_UTILS.PUBLIC.SNOWFLAKE_AI_HOL_REPO
-  API_INTEGRATION = HOL_GITHUB_API
-  ORIGIN = 'https://github.com/jfromkamel/snowflake-ai-hol';
-ALTER GIT REPOSITORY HOL_UTILS.PUBLIC.SNOWFLAKE_AI_HOL_REPO FETCH;
-LS @HOL_UTILS.PUBLIC.SNOWFLAKE_AI_HOL_REPO/branches/main/;
-```
+> **Troubleshooting:** If Cortex Code can't handle the Git setup, see [Appendix A: SQL Fallbacks](#appendix-a-sql-fallbacks) at the end of this guide.
 
 ### 0.4 Browse Lab Files in a Workspace
 
 Now that Snowflake is connected to GitHub, create a visual workspace to browse the repo files:
 
 1. In the left sidebar, go to **Projects > Workspaces**
-2. Click the **+** next to Workspaces and select **Git workspace**
+2. Click the **+** next to Databases and select **Git workspace**
 3. Paste: `https://github.com/jfromkamel/snowflake-ai-hol`
 4. Select `HOL_GITHUB_API` as the API Integration
 5. Choose **Public repository** for authentication
 6. Click **Create**
 
+![Workspace Plus Icon](workspace_plus_icon.png)
+
 **Expected output:** The repo files (`healthcare/`, `financial-services/`, `README.md`) appear in the left-hand file explorer. You can browse any file directly from Snowsight.
 
 > **Why this matters:** Your Snowflake account now has a live, bidirectional connection to GitHub. You can pull the latest changes, create branches, commit edits, push updates back to the remote repo, and resolve merge conflicts -- all directly from Snowsight. This means developers get full Git workflows (branching, pull/push, conflict resolution) natively inside Snowflake without switching tools.
 
-> **Tip:** You can also open `LAB_GUIDE.md` directly in the workspace file explorer (under your industry folder) and follow along from there instead of the PDF -- whichever you prefer.
+> **Tip:** Feel free to browse the files freely in the workspace file explorer -- you'll find setup scripts, PDF documents, and prompt libraries for each industry track.
 
 
 ---
@@ -152,7 +138,9 @@ row count so I can confirm everything loaded correctly.
 
 ### 1.2 Explore Your New Database
 
-Take a moment to see what was created. In the left navigation, click **Databases** and expand **HEALTHCARE_HOL_DB > CLINICAL > Tables**. Click on any table (e.g., **BEDS**) to see its details, columns, and a Cortex-generated description that automatically explains what the table contains.
+Take a moment to see what was created. In the Cortex Code response, you'll see a hyperlink to **HEALTHCARE_HOL_DB** — click it to open the database directly in the Database Explorer. From there, expand **CLINICAL > Tables** and click on any table (e.g., **BEDS**) to see its details, columns, and a Cortex-generated description that automatically explains what the table contains.
+
+![Database Hyperlink](database_hyperlink.png)
 
 ![Database Explorer](databsae explorer.png)
 
@@ -239,30 +227,27 @@ Step out of Cortex Code for a moment -- let's see what you built in the Snowsigh
 
 **Ask a question:**
 
-5. In the chat box, type: *"How many patients are currently admitted by department?"*
-6. Cortex Analyst generates SQL, runs it, and returns results -- all in one step
-7. Click **Add to Verified Queries** below the response to save this as a verified query. Verified queries act as trusted reference answers that improve the model's accuracy over time.
+5. Click the **Playground** tab on the right-hand side to open the chat interface
+6. In the chat box, type: *"How many patients are currently admitted by department?"*
+7. Cortex Analyst generates SQL, runs it, and returns results -- all in one step
+8. Click **Add to Verified Queries** below the response to save this as a verified query. Verified queries act as trusted reference answers that improve the model's accuracy over time.
 
 **Explore your semantic view:**
 
-8. Click the back arrow to return to the semantic view detail page. Take a moment to explore:
+9. Click the **Suggestions** tab and then click **Start Learning** to let the model analyze your data. While it learns, explore the other tabs:
    - **Custom Instructions** -- business rules and context you provided (e.g., "high readmission risk = RISK_SCORE > 0.7")
    - **Logical Tables** -- the tables included in this model and their columns
    - **Relationships** -- how tables are joined together
    - **Verified Queries** -- saved question/SQL pairs (including the one you just added) that serve as reference examples
-   - **Suggestions** -- the model's recommendations for improving coverage
+   - **Monitor** -- a history of every question asked, the SQL generated, whether it succeeded, and user feedback
 
 > **Note:** The Analyst can answer *any* natural language question about the included tables -- not just verified ones. Verified queries simply improve accuracy by giving the model reference examples of correct SQL for common questions.
 
 **Ask a follow-up:**
 
-9. Now ask: *"What is the average length of stay for cardiology patients?"*
-10. Notice the conversation maintains context -- this is a full dialogue, not isolated one-off queries.
-
-**Check the monitoring view:**
-
-11. Click the **Monitor** tab at the top of the Analyst UI
-12. You'll see a history of every question asked, the SQL generated, whether it succeeded, and user feedback. This is how data teams identify gaps in the semantic model and prioritize improvements.
+10. Go back to the **Playground** tab and ask: *"What is the average length of stay for cardiology patients?"*
+11. Notice the conversation maintains context -- this is a full dialogue, not isolated one-off queries.
+12. Return to the **Suggestions** tab -- check if the model has generated any suggestions for improving your semantic view's coverage.
 
 > **Key takeaway:** Anyone in your organization -- a nurse manager, a CMO, an ops analyst -- can now query clinical data in plain English. No SQL, no data engineering ticket, no waiting.
 
@@ -279,6 +264,8 @@ In this step, you'll turn a PDF document into a fully searchable knowledge base.
 This is what's commonly called **RAG (Retrieval Augmented Generation)** -- but you won't need to configure any of that. Cortex Code handles it in one prompt.
 
 ### 3.1 Bring the PDF into Snowflake
+
+> **Before continuing:** Click the **Snowflake logo** in the upper-left corner to return to the homepage. If the Cortex Code chat panel is closed, expand it from the lower-right corner.
 
 Copy and paste this prompt into Cortex Code:
 
@@ -325,7 +312,7 @@ Cortex Code will return a URL. Open it in a new browser tab to read the source d
 
 1. In the left navigation, hover over the **Cortex** icon
 2. Click **Cortex Search**
-3. In the **Database** dropdown, select **HEALTHCARE_HOL_DB**
+3. In the **Database** dropdown, select **HEALTHCARE_HOL_DB** (might already be pre-selected)
 4. Find **CLINICAL_DOCS_INFO** in the list and click on it to open it
 5. You'll land on the service detail page -- click the **Query** tab (or **Playground**) to open the search interface
 
@@ -387,12 +374,12 @@ This is where developers and data engineers build and manage agents. Think of it
 1. In the left navigation, hover over the **Cortex** icon
 2. Click **Agents**
 3. Find **HEALTHCARE_AGENT** and click on it
-4. Open the **Tools** tab -- you'll see all 3 tools listed:
+4. On the left-hand side, you'll see all 3 tools listed:
    - PATIENT_CARE_DATA (Cortex Analyst -- clinical data)
    - CLAIMS_DATA (Cortex Analyst -- insurance claims)
    - CLINICAL_DOCS (Cortex Search -- documentation)
-5. Click on any tool to see its configuration -- the semantic model it points to, the search service it queries, and the warehouse it uses
-6. Open the **Settings** tab -- here you can edit the agent's system prompt, set its persona, and control what it can and can't do
+5. Ask a couple of questions in the chat panel, for example: *"Which patients are at high risk for readmission?"* and *"What is the discharge planning procedure?"*
+6. Open the **Monitor** tab and click on a specific request to see all monitoring metrics -- latency, tokens used, tool calls made, and the full response trace
 
 > **Who uses this view:** Admins and data engineers. This is where you build, update, and govern agents. Business users never need to come here.
 
@@ -402,10 +389,7 @@ This is where developers and data engineers build and manage agents. Think of it
 
 This is what your business users actually see -- a polished, conversational interface built on top of the same agent.
 
-7. In the left navigation, look for **Snowflake Intelligence** (it appears as a standalone section, separate from Cortex)
-8. If you don't see it, try navigating to **Cortex > Snowflake Intelligence**
-9. Select **HEALTHCARE_AGENT** from the agent list
-10. You're now in the end-user chat interface
+7. Click **Preview in Snowflake Intelligence** in the upper-right corner to switch from the admin view to the end-user experience
 
 **What's different here compared to Cortex > Agents:**
 - Responses automatically render as **charts or tables** depending on the question type -- no configuration needed
@@ -420,21 +404,16 @@ This is what your business users actually see -- a polished, conversational inte
 
 ### 4.3 Test the Agent in Snowflake Intelligence
 
-Stay in the Snowflake Intelligence UI. Click **Playground** and try these questions:
+Try these questions to see the three types of responses:
 
-**Question 1 -- Patient Analysis (routes to clinical data):**
+**Question 1 -- Structured data (table response):**
 > Which patients are at high risk for readmission?
 
-**Question 2 -- Operational Analysis (complex multi-table query):**
-> For departments with the highest average length of stay, show me the most common diagnoses and the bed occupancy rate.
+**Question 2 -- Charting (visual response):**
+> Plot the number of admissions by department over the last 30 days as a line chart.
 
-**Question 3 -- Claims Analysis (routes to claims data):**
-> What is the approval rate by insurance type, and which claims were denied?
-
-**Question 4 -- Policy Lookup (routes to document search):**
+**Question 3 -- Unstructured data (document search):**
 > What does our documentation say about discharge planning procedures?
-
-> **Key takeaway:** The agent automatically picks the right tool for each question. One interface, every data source, no SQL required.
 
 ---
 
@@ -456,19 +435,24 @@ The agent you've created is actually surfaceable in three different ways, and th
 > **The Cortex Agents REST API** is the same endpoint this Streamlit app will call. That means the agent you built today can also power a Slack bot, a Microsoft Teams integration, an external web portal, or a mobile app -- with no changes to the agent itself.
 
 In this step, you'll build a 3-page app:
-- **Chat** -- the same agent, now inside your own branded interface
-- **Dashboard** -- fixed operational views of bed occupancy by department, critical lab alerts, and high-risk patient flags
-- **Optimization** -- a bed allocation optimizer built in Python that runs directly on your live data
+1. **Chat** -- the same agent, now inside your own branded interface
+2. **Dashboard** -- fixed operational views of bed occupancy by department, critical lab alerts, and high-risk patient flags
+3. **Optimization** -- a bed allocation optimizer built in Python that runs directly on your live data
 
 > **The big picture:** Snowflake Intelligence is a great out-of-the-box experience. Streamlit is how you build a product around the same intelligence layer -- and the REST API is how you take it everywhere else.
 
 ### 5.1 Create the Chat Page (8 minutes)
+
+> **Before continuing:** Switch back to your original browser tab (Snowflake Intelligence opened in a new tab). Navigate to **Projects > Workspaces** and open your workspace. Make sure Cortex Code is open in the lower-right corner.
 
 Copy and paste this prompt into Cortex Code:
 
 ```
 Build a single-page Streamlit app in Snowflake called HEALTHCARE_ASSISTANT_APP
 in HEALTHCARE_HOL_DB.CLINICAL using HEALTHCARE_HOL_WH.
+
+Use my workspace to create the Streamlit files directly for collaboration.
+Use streamlit==1.52.2 for chat features.
 
 Use st.tabs() to create a horizontal tab bar at the top of the page
 with three tabs: "Chat", "Dashboard", and "Optimization". All three
@@ -508,7 +492,8 @@ Apply a clean clinical design throughout the app:
 
 ### 5.2 Open and Test the Chat Page
 
-1. Navigate to the app in Snowsight (Projects > Streamlit > HEALTHCARE_ASSISTANT_APP)
+1. In the left sidebar, go to **Projects > Streamlit**, right-click **HEALTHCARE_ASSISTANT_APP**, and select **Open in new tab**
+2. Keep this tab open for the rest of the lab -- use it to view and refresh the app whenever changes are made. Use your other tab (with the workspace and Cortex Code) for prompting.
 
 > **App not loading or showing an error?** Copy the full error message, go back to Cortex Code, and paste this prompt:
 >
@@ -558,6 +543,11 @@ BOTTOM ROW - a critical alerts table:
 - Sort by risk score descending (highest risk first)
 - Include a button to download the table as a CSV
 
+INTERACTIVITY:
+- Add a department filter dropdown at the top that filters all charts and the table
+- Add a risk score slider to adjust the threshold (default 0.7)
+- Make the bar chart bars clickable -- clicking a department filters the patient table to show only that department's high-risk patients
+
 Chart styling:
 Use plotly for all charts. Color palette: steel blue (#2563EB) as the primary series color, teal (#0D9488) as the secondary. Use green (#16A34A), amber (#D97706), red (#DC2626) for status-based coloring only. All chart backgrounds should be white (#FFFFFF) with light gray grid lines. No dark backgrounds on any chart.
 Position the legend below each chart (orientation="h", y=-0.3) to prevent overlap with chart titles. Add a top margin (t=50) on all charts so the title never crowds the plot area.
@@ -571,20 +561,27 @@ Copy and paste this prompt into Cortex Code:
 Fill in the Optimization tab of HEALTHCARE_ASSISTANT_APP with the following content.
 
 Title: "Clinical Intelligence"
-Subtitle: "Optimize bed allocation and forecast readmission risk using
+Subtitle: "Optimize bed allocation and forecast patient demand using
 AI and machine learning on your live clinical data."
 
 At the top of the tab, add a mode selector using radio buttons:
 - "Bed Optimizer"
-- "Readmission Risk Forecaster"
+- "Demand Forecaster"
 
 ---
 
 MODE 1: Bed Optimizer
 
-Show the following controls in a row above the results:
-- A multi-select for Department (options from DEPARTMENTS table, plus "All")
+DATA EXPLORATION (shown immediately when this mode is selected):
+- A department multi-select filter (from DEPARTMENTS table, plus "All")
 - A slider for Occupancy Alert Threshold: 60% to 95% (default 80%)
+- A plotly grouped bar chart showing current occupancy by department
+  (occupied vs available beds), with a horizontal reference line at the
+  threshold -- updates in real-time as filters change
+- Below the chart, a data table showing current bed status per department
+  (Department, Occupied, Available, Occupancy %, Status)
+
+OPTIMIZATION CONTROLS (below the data exploration):
 - A toggle: "Include patients nearing discharge (LOS > 5 days)"
 - A steel blue "Run Optimizer" button
 
@@ -601,40 +598,48 @@ Display results as:
 - Three KPI cards: Departments Over Threshold, Beds That Can Be Freed,
   Patients Flagged for Discharge Review
 - A plotly grouped bar chart showing before/after occupancy by department,
-  with a horizontal reference line at the selected threshold
+  with the threshold reference line
 - A recommended actions table: Patient ID, From Department, To Department,
   Bed Type, Reason -- sorted by urgency
-- Apply the app styling: white background, clinical blue/teal palette,
-  plotly white chart backgrounds
+- A button to download recommendations as CSV
 
 ---
 
-MODE 2: Readmission Risk Forecaster
+MODE 2: Demand Forecaster
 
-Show the following controls:
-- A dropdown for Department (from DEPARTMENTS table)
+DATA EXPLORATION (shown immediately when this mode is selected):
+- A department dropdown (from DEPARTMENTS table)
+- A date range slider to explore historical data (last 90 days)
+- A plotly line chart showing historical daily admissions and occupancy
+  from DAILY_CENSUS for the selected department, updating as filters
+  change. Use soft blue for admissions, teal for occupancy count.
+- Below the chart, a summary table of the filtered census data
+  (Date, Admissions, Discharges, Occupancy, Available Beds)
+
+FORECASTING CONTROLS (below the data exploration):
 - Radio buttons for Forecast Horizon: 7 days / 14 days / 30 days
 - A steel blue "Generate Forecast" button
 
 When clicked:
-1. Pull the daily count of high-risk patients (RISK_SCORE > 0.7) from
-   READMISSIONS joined with ENCOUNTERS, grouped by department and date
-2. Use SNOWFLAKE.ML.FORECAST to predict the number of high-risk patients
-   expected in that department over the selected horizon
+1. Pull daily census data from DAILY_CENSUS for the selected department
+2. Use SNOWFLAKE.ML.FORECAST to train a forecast model on the historical
+   ADMISSIONS values and predict the next N days (based on the selected
+   horizon). Run this as a SQL operation inside Snowflake.
 3. Retrieve forecast values with upper and lower confidence bounds
 
 Display results as:
-- A headline KPI card: "Patients at High Readmission Risk (Forecasted)"
-  for the selected horizon period
-- A plotly line chart with:
-  - Historical high-risk patient count (solid blue line, #2563EB)
-  - Forecasted count (dotted line with light blue confidence band)
+- A headline KPI card: "Forecasted Daily Admissions" (average over the
+  forecast horizon)
+- A plotly line chart combining historical and forecast:
+  - Historical admissions (solid blue line, #2563EB)
+  - Forecasted admissions (dotted line with light blue confidence band)
+  - Capacity threshold line (dashed red at available beds)
   - X-axis: dates, Y-axis: patient count
   - Legend below the chart, white background
-- A risk summary table: Date, Forecasted High-Risk Count, vs Current
-  Average, Change (% above/below baseline)
-- A small note: "Forecast based on [N] days of historical data.
-  Confidence intervals widen with shorter history."
+- A capacity risk table: dates where forecasted admissions + current
+  occupancy would exceed available beds, with columns:
+  Date, Forecasted Admissions, Projected Occupancy, Capacity, Risk Level
+- A button to download the forecast as CSV
 
 ---
 
@@ -652,3 +657,26 @@ Add scipy to the app's dependencies.
 3. **Optimization** -- Click "Run Optimization" and see bed rebalancing recommendations
 
 > **Congratulations!** You've built a complete AI-powered healthcare application -- clinical database, semantic layer, document search, intelligent agent, and a polished UI -- all by talking to Cortex Code.
+
+---
+
+## Appendix A: SQL Fallbacks
+
+### Fallback SQL for Step 0.3
+
+If Cortex Code can't handle the Git setup, run this SQL directly in a Snowsight worksheet:
+
+```sql
+USE ROLE ACCOUNTADMIN;
+CREATE DATABASE IF NOT EXISTS HOL_UTILS;
+CREATE SCHEMA IF NOT EXISTS HOL_UTILS.PUBLIC;
+CREATE OR REPLACE API INTEGRATION HOL_GITHUB_API
+  API_PROVIDER = git_https_api
+  API_ALLOWED_PREFIXES = ('https://github.com/jfromkamel/')
+  ENABLED = TRUE;
+CREATE OR REPLACE GIT REPOSITORY HOL_UTILS.PUBLIC.SNOWFLAKE_AI_HOL_REPO
+  API_INTEGRATION = HOL_GITHUB_API
+  ORIGIN = 'https://github.com/jfromkamel/snowflake-ai-hol';
+ALTER GIT REPOSITORY HOL_UTILS.PUBLIC.SNOWFLAKE_AI_HOL_REPO FETCH;
+LS @HOL_UTILS.PUBLIC.SNOWFLAKE_AI_HOL_REPO/branches/main/;
+```

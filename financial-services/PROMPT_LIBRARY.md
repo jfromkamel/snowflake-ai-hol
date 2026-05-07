@@ -106,7 +106,7 @@ files to a stage.
 
 ### 2.3 Explore -- Snowsight UI
 Guide attendees to Cortex > Analyst. Select FINSERV_HOL_DB > PORTFOLIO > PORTFOLIO_ANALYTICS.
-Ask a question, then click "Add to Verified Queries". Walk through the semantic view tour: Custom Instructions, Logical Tables, Relationships, Verified Queries, Suggestions.
+Open the Playground tab on the right-hand side and ask a question, then click "Add to Verified Queries". Click the Suggestions tab and click "Start Learning". While it learns, explore the other tabs: Custom Instructions, Logical Tables, Relationships, Verified Queries, Monitor.
 
 ---
 
@@ -135,7 +135,7 @@ To do this:
 ```
 
 ### 3.3 Test Search -- Snowsight UI
-Guide attendees to AI & ML > Search to test RISK_DOCS_INFO.
+Guide attendees to Cortex > Cortex Search. Select FINSERV_HOL_DB (might already be pre-selected). Find RISK_DOCS_INFO and test it.
 
 ---
 
@@ -165,7 +165,7 @@ Give it three tools:
 ```
 
 ### 4.2/4.3 -- Snowsight UI
-Test in AI & ML > Agents > FINSERV_AGENT Playground.
+Navigate to Cortex > Agents > FINSERV_AGENT. Tools are listed on the left-hand side. Ask a couple questions in the chat panel, then open the Monitor tab and click a specific request to see metrics. Click "Preview in Snowflake Intelligence" in the upper-right to switch to the end-user experience. Test the 3 question types: structured data, charting, and document search.
 
 ---
 
@@ -175,6 +175,9 @@ Test in AI & ML > Agents > FINSERV_AGENT Playground.
 ```
 Build a single-page Streamlit app in Snowflake called FINSERV_ASSISTANT_APP
 in FINSERV_HOL_DB.PORTFOLIO using FINSERV_HOL_WH.
+
+Use my workspace to create the Streamlit files directly for collaboration.
+Use streamlit==1.52.2 for chat features.
 
 Use st.tabs() to create a horizontal tab bar at the top of the page
 with three tabs: "Chat", "Dashboard", and "Optimization". All three
@@ -235,31 +238,44 @@ BOTTOM ROW - a compliance alerts table:
 - Sort by severity (Critical > High > Medium > Low)
 - Include a button to download the table as a CSV
 
+INTERACTIVITY:
+- Add an advisor filter dropdown at the top that filters all charts and the table
+- Add a severity multi-select filter for compliance alerts
+- Make the bar chart bars clickable -- clicking an advisor filters the alerts table to show only that advisor's open alerts
+
 Chart styling:
 Use plotly for all charts. Color palette: deep navy (#0F172A) as the primary series color, warm gold (#B45309) as the secondary. Use green (#16A34A) for gains/positive and red (#DC2626) for losses/negative. All chart backgrounds should be white (#FFFFFF) with light gray grid lines. No dark backgrounds on any chart.
 Position the legend below each chart (orientation="h", y=-0.3) to prevent overlap with chart titles. Add a top margin (t=50) on all charts so the title never crowds the plot area.
 ```
 
 ### 5.3 Optimization Page
-```
+`
 Fill in the Optimization tab of FINSERV_ASSISTANT_APP with the following content.
 
 Title: "Portfolio Intelligence"
-Subtitle: "Rebalance portfolios and forecast risk exposure using
+Subtitle: "Rebalance portfolios and forecast performance using
 AI and machine learning on your live portfolio data."
 
 At the top of the tab, add a mode selector using radio buttons:
 - "Rebalancing Optimizer"
-- "Risk Forecaster"
+- "Performance Forecaster"
 
 ---
 
 MODE 1: Rebalancing Optimizer
 
-Show the following controls in a row above the results:
-- A dropdown for Advisor (from ADVISORS table, plus "All advisors")
+DATA EXPLORATION (shown immediately when this mode is selected):
+- An advisor dropdown filter (from ADVISORS table, plus "All advisors")
+- A risk tolerance multi-select (Conservative / Moderate / Aggressive)
+- A plotly treemap showing current portfolio allocation by asset class
+  across filtered accounts -- cells colored by concentration level
+  (green within limits, amber approaching, red exceeding 15%)
+  Updates in real-time as filters change.
+- Below the treemap, a data table of holdings for the filtered accounts
+  (Account, Security, Asset Class, Position %, Market Value, Status)
+
+OPTIMIZATION CONTROLS (below the data exploration):
 - A slider for Concentration Limit: 5% to 25% (default 15%)
-- A multi-select for Risk Tolerance Filter: Conservative / Moderate / Aggressive
 - A steel blue "Run Optimizer" button
 
 When clicked:
@@ -274,45 +290,50 @@ When clicked:
 Display results as:
 - Three KPI cards: Accounts Needing Rebalancing, Total Notional Trade
   Value, Estimated Compliance Alerts Resolved
-- A plotly treemap showing current portfolio allocation by asset class
-  across all selected accounts -- cells colored red where concentration
-  exceeds the limit, green where within limits
+- A plotly treemap showing before/after allocation comparison
 - A recommended sells table: Account, Security, Current %, Target %,
   Shares to Sell, Estimated Proceeds
 - A recommended buys table: Security, Asset Class, Shares to Buy,
   Estimated Cost, Rationale
-- Apply the app styling: white background, navy/gold palette,
-  plotly white chart backgrounds
+- A button to download recommendations as CSV
 
 ---
 
-MODE 2: Risk Forecaster
+MODE 2: Performance Forecaster
 
-Show the following controls:
-- A dropdown for Account (from ACCOUNTS table, or "All accounts")
-- Radio buttons for Forecast Horizon: 30 days / 60 days / 90 days
+DATA EXPLORATION (shown immediately when this mode is selected):
+- An account dropdown (from ACCOUNTS table)
+- A date range slider to explore historical data (last 90 days)
+- A plotly line chart showing historical daily portfolio value from
+  DAILY_MARKET_DATA for the selected account, updating as filters change.
+  Use deep navy for portfolio value.
+- Below the chart, a summary table of the filtered market data
+  (Date, Portfolio Value, Daily Change %, Cumulative Return %)
+
+FORECASTING CONTROLS (below the data exploration):
+- Radio buttons for Forecast Horizon: 14 days / 30 days / 60 days
 - A steel blue "Generate Forecast" button
 
 When clicked:
-1. Pull historical risk scores from RISK_SCORES joined with ACCOUNTS,
-   converting ASSESSMENT_DATE to a time series
-2. Use SNOWFLAKE.ML.FORECAST to predict the portfolio risk score trajectory
-   over the selected horizon for the chosen account(s)
+1. Pull daily portfolio values from DAILY_MARKET_DATA for the selected
+   account
+2. Use SNOWFLAKE.ML.FORECAST to train a forecast model on the historical
+   PORTFOLIO_VALUE and predict the next N days (based on the selected
+   horizon). Run this as a SQL operation inside Snowflake.
 3. Retrieve forecast values with upper and lower confidence bounds
 
 Display results as:
-- A headline KPI card: "Forecasted Risk Score" at end of horizon,
-  with an arrow and color indicator (green if decreasing, red if increasing)
-- A plotly line chart with:
-  - Historical risk score (solid navy line, #0F172A)
-  - The high-risk threshold line (dashed red at 0.8)
-  - Forecasted risk score (dotted line with light gold confidence band)
-  - X-axis: dates, Y-axis: risk score (0.0 to 1.0)
+- A headline KPI card: "Forecasted Portfolio Value" at end of horizon,
+  with an arrow and color indicator (green if increasing, red if decreasing)
+- A plotly line chart combining historical and forecast:
+  - Historical portfolio value (solid navy line, #0F172A)
+  - Forecasted value (dotted line with light gold confidence band)
+  - X-axis: dates, Y-axis: dollar value
   - Legend below the chart, white background
-- A risk outlook table: Account Name, Current Score, Forecasted Score,
-  Trend, Recommended Action (Reduce Equity / Hold / Review with Client)
-- A small note: "Forecast based on [N] assessment periods of historical
-  data. Confidence intervals widen with shorter history."
+- A risk outlook table: showing periods where the forecast lower bound
+  drops below a key threshold (e.g., 5% below current value), with columns:
+  Date, Forecasted Value, Lower Bound, Potential Drawdown %, Risk Level
+- A button to download the forecast as CSV
 
 ---
 
@@ -321,4 +342,4 @@ white background, deep navy sidebar (#0F172A), gold accent (#B45309),
 plotly white chart backgrounds, sentence case, no all-caps.
 
 Add scipy to the app's dependencies.
-```
+`

@@ -75,7 +75,7 @@ use it as a file source during this lab.
 
 > **What's happening:** Cortex Code is creating a live connection between your Snowflake account and the lab's GitHub repository. All scripts, models, and documents will be accessible directly from GitHub -- no manual file handling needed.
 
-> **Important -- "Allow in this chat" permissions:** When Cortex Code tries to run a CREATE statement, you'll see a permission prompt asking whether to allow it. Click the **Allow** dropdown arrow and select **"Allow CREATE in this chat"**. Do the same for any subsequent permission prompts you encounter (e.g., ALTER, INSERT, etc.). This prevents you from having to manually approve every single statement for the rest of the lab.
+> **Important -- "Allow in this chat" (or "Allow in this session") permissions:** When Cortex Code tries to run a CREATE statement, you'll see a permission prompt asking whether to allow it. Click the **Allow** dropdown arrow and select **"Allow CREATE in this chat"** (or **"Allow CREATE in this session"**). Do the same for any subsequent permission prompts you encounter (e.g., ALTER, INSERT, etc.). This prevents you from having to manually approve every single statement for the rest of the lab.
 >
 > ![Always allow permission](permission.png)
 
@@ -83,7 +83,7 @@ use it as a file source during this lab.
 
 > **Note:** This is the only prompt in the lab that requires ACCOUNTADMIN. Cortex Code will handle the role switching automatically.
 
-> **Troubleshooting:** If Cortex Code can't handle the Git setup, see [Appendix A: Fallbacks](#appendix-a-fallbacks) at the end of this guide.
+> **Troubleshooting:** If Cortex Code can't handle the Git setup, see **Appendix A: Fallbacks** at the end of this guide.
 
 ### 0.4 Browse Lab Files in a Workspace
 
@@ -148,7 +148,7 @@ Take a moment to see what was created. In the Cortex Code response, you'll see a
 
 &nbsp;
 
-> **Tip:** If Cortex Code didn't provide a hyperlink to the database in the response, you can navigate to it manually through the **Database Explorer** menu in the left sidebar. From there, expand **HEALTHCARE_HOL_DB > CLINICAL > BEDS**. See [Appendix A: Fallbacks](#appendix-a-fallbacks) for a screenshot.
+> **Tip:** If Cortex Code didn't provide a hyperlink to the database in the response, you can navigate to it manually through the **Database Explorer** menu in the left sidebar. From there, expand **HEALTHCARE_HOL_DB > CLINICAL > BEDS**. See **Appendix A: Fallbacks** at the end of this guide for a screenshot.
 
 &nbsp;
 
@@ -706,7 +706,7 @@ In 90 minutes, using only natural language prompts, you built:
 
 If Cortex Code didn't provide a database hyperlink, use the **Database Explorer** menu in the left sidebar to navigate to your database:
 
-![Database Nav Menu](database_nav_menu.png)
+<img src="database_nav_menu.png" alt="Database Nav Menu" width="400">
 
 ### Fallback SQL for Step 0.3
 

@@ -84,7 +84,7 @@ use it as a file source during this lab.
 
 > **Note:** This is the only prompt in the lab that requires ACCOUNTADMIN. Cortex Code will handle the role switching automatically.
 
-> **Troubleshooting:** If Cortex Code can't handle the Git setup, see [Appendix A: SQL Fallbacks](#appendix-a-sql-fallbacks) at the end of this guide.
+> **Troubleshooting:** If Cortex Code can't handle the Git setup, see [Appendix A: Fallbacks](#appendix-a-fallbacks) at the end of this guide.
 
 
 ### 0.4 Browse Lab Files in a Workspace
@@ -128,6 +128,8 @@ Use EXECUTE IMMEDIATE FROM to run it. After execution, set
 INDUSTRIAL_HOL_WH as the active warehouse for the rest of our session
 and show me a summary table of every table created with its schema and
 row count so I can confirm everything loaded correctly.
+
+Include a pill at the end of the response that redirects to the created database.
 ```
 
 > **What's happening:** The script creates:
@@ -142,9 +144,17 @@ row count so I can confirm everything loaded correctly.
 
 Take a moment to see what was created. In the Cortex Code response, you'll see a hyperlink to **INDUSTRIAL_HOL_DB** — click it to open the database directly in the Database Explorer. From there, expand **OPERATIONS > Tables** and click on any table (e.g., **EQUIPMENT**) to see its details, columns, and a Cortex-generated description that automatically explains what the table contains.
 
-![Database Hyperlink](database_hyperlink.png)
+&nbsp;
 
-![Database Explorer](databsae explorer.png)
+![Database Pill](database_pill.png)
+
+&nbsp;
+
+> **Tip:** If Cortex Code didn't provide a hyperlink to the database in the response, you can navigate to it manually through the **Database Explorer** menu in the left sidebar. From there, expand **INDUSTRIAL_HOL_DB > OPERATIONS > EQUIPMENT**. See [Appendix A: Fallbacks](#appendix-a-fallbacks) for a screenshot.
+
+&nbsp;
+
+![Database Explorer](database_explorer.png)
 
 > **Why this matters:** The Database Explorer gives you instant visibility into every object Cortex Code created -- table schemas, row counts, column types, and AI-generated descriptions -- without writing a single query.
 
@@ -219,7 +229,7 @@ Step out of Cortex Code for a moment -- let's see what you built in the Snowsigh
 
 **Navigate to the Analyst:**
 
-1. In the left navigation, hover over the **Cortex** icon
+1. In the left navigation, hover over the **Cortex** icon (or **AI/ML** section)
 2. Click **Analyst**
 3. In the **Database** dropdown at the top, select **INDUSTRIAL_HOL_DB**, then select the **OPERATIONS** schema
 4. Find your **EQUIPMENT_ANALYTICS** semantic view in the list and click it to open it
@@ -309,7 +319,7 @@ Cortex Code will return a URL. Open it in a new browser tab to read the source d
 
 **Navigate to the Search Playground:**
 
-1. In the left navigation, hover over the **Cortex** icon
+1. In the left navigation, hover over the **Cortex** icon (or **AI/ML** section)
 2. Click **Cortex Search**
 3. In the **Database** dropdown, select **INDUSTRIAL_HOL_DB** (might already be pre-selected)
 4. Find **MAINTENANCE_DOCS_INFO** in the list and click on it to open it
@@ -368,7 +378,7 @@ There are two separate places in Snowsight where your agent lives -- and they se
 
 This is where developers and data engineers build and manage agents. Think of it as the control panel.
 
-1. In the left navigation, hover over the **Cortex** icon
+1. In the left navigation, hover over the **Cortex** icon (or **AI/ML** section)
 2. Click **Agents**
 3. Find **INDUSTRIAL_AGENT** and click on it
 4. On the left-hand side, you'll see all 3 tools listed:
@@ -669,7 +679,43 @@ Add scipy to the app's dependencies.
 
 ---
 
-## Appendix A: SQL Fallbacks
+## Conclusion: What You Built
+
+In 90 minutes, using only natural language prompts, you built:
+
+1. **A production database** with 10 tables and 18 months of operational data
+2. **Two semantic models** enabling text-to-SQL analytics for any business user
+3. **A document search engine** (RAG) over your maintenance operations guide
+4. **An intelligent agent** that routes questions to the right data source automatically
+5. **A 3-page Streamlit app** with chat, interactive dashboards, and ML-powered optimization
+
+### Time Comparison: Cortex Code vs Traditional Development
+
+| Component | Traditional Approach | With Cortex Code |
+|-----------|---------------------|-----------------|
+| Database + sample data | 2-3 days (schema design, ETL, testing) | ~5 minutes |
+| Semantic model | 1-2 weeks (data modeling, business rules, testing) | ~5 minutes |
+| Document search (RAG) | 1-2 weeks (parsing, chunking, embedding, indexing) | ~3 minutes |
+| AI agent with 3 tools | 2-4 weeks (orchestration, routing, testing) | ~5 minutes |
+| Streamlit app (chat + dashboard + ML) | 3-6 weeks (frontend, backend, ML pipeline) | ~25 minutes |
+| **Total** | **8-15 weeks** | **~45 minutes** |
+
+### Key Takeaways
+
+- **No code written manually** -- every artifact was generated through conversation
+- **Production-grade output** -- semantic models, agents, and apps are real Snowflake objects you can share, govern, and scale
+- **Three surfaces for one agent** -- Snowflake Intelligence (out-of-the-box), Streamlit (custom apps), REST API (embed anywhere)
+- **ML built in** -- SNOWFLAKE.ML.FORECAST and scipy optimization running directly on live data, no external infrastructure
+
+---
+
+## Appendix A: Fallbacks
+
+### Fallback for Step 1.2
+
+If Cortex Code didn't provide a database hyperlink, use the **Database Explorer** menu in the left sidebar to navigate to your database:
+
+![Database Nav Menu](database_nav_menu.png)
 
 ### Fallback SQL for Step 0.3
 

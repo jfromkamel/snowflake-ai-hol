@@ -173,8 +173,10 @@ header .pill {
 .tab-btn {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 7px;
   padding: 9px 20px;
+  min-width: 220px;
   border-radius: 999px;
   border: 2px solid #CBD5E1;
   background: white;
@@ -976,8 +978,8 @@ footer strong { color: #64748B; }
   <div class="toggle-label">Choose your industry track:</div>
   <div class="toggle-buttons">
     <button class="tab-btn" data-industry="healthcare" onclick="setIndustry('healthcare')">🏥 Healthcare</button>
-    <button class="tab-btn" data-industry="financial-services" onclick="setIndustry('financial-services')">💰 Financial Services</button>
     <button class="tab-btn" data-industry="industrial" onclick="setIndustry('industrial')">⚙️ Industrial/Manufacturing</button>
+    <button class="tab-btn" data-industry="financial-services" onclick="setIndustry('financial-services')">💰 Financial Services</button>
   </div>
   <div class="industry-icons" id="industry-icons"></div>
 </div>

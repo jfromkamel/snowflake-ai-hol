@@ -377,8 +377,10 @@ UNION ALL SELECT 268, 6, 7, 1, 'Inspection', 'High', 'Corrosion inspection', DAT
 UNION ALL SELECT 269, 3, 8, 1, 'Corrective', 'High', 'Valve replacement', DATEADD(DAY, -20, CURRENT_DATE()), DATEADD(DAY, -20, CURRENT_DATE()), DATEADD(DAY, -20, CURRENT_DATE()), 'Completed', 1.3, 1.7, 847.38, 94.5
 UNION ALL SELECT 270, 20, 3, 5, 'Preventive', 'Critical', 'Filter replacement', DATEADD(DAY, -20, CURRENT_DATE()), DATEADD(DAY, -17, CURRENT_DATE()), DATEADD(DAY, -17, CURRENT_DATE()), 'Completed', 1.3, 1.3, 1359.86, 55.71
 UNION ALL SELECT 271, 12, 14, 2, 'Corrective', 'High', 'Bearing replacement', DATEADD(DAY, -19, CURRENT_DATE()), DATEADD(DAY, -17, CURRENT_DATE()), DATEADD(DAY, -17, CURRENT_DATE()), 'Completed', 15.1, 20.2, 2275.71, 944.71
-UNION ALL SELECT 272, 17, 19, 4, 'Preventive', 'Low', 'Belt tension adjustment', DATEADD(DAY, -19, CURRENT_DATE()), DATEADD(DAY, -16, CURRENT_DATE()), DATEADD(DAY, -16, CURRENT_DATE()), 'Completed', 14.0, 17.5, 2789.27, 1073.35
-UNION ALL SELECT 273, 7, 18, 2, 'Preventive', 'High', 'Belt tension adjustment', DATEADD(DAY, -19, CURRENT_DATE()), DATEADD(DAY, -17, CURRENT_DATE()), DATEADD(DAY, -17, CURRENT_DATE()), 'Completed', 13.9, 18.9, 1417.33, 1040.28
+UNION ALL SELECT 272, 17, 19, 4, 'Preventive', 'Low', 'Belt tension adjustment', DATEADD(DAY, -19, CURRENT_DATE()), DATEADD(DAY, -16, CURRENT_DATE()), DATEADD(DAY, -16, CURRENT_DATE()), 'Completed', 14.0, 17.5, 2789.27, 1073.35;
+
+INSERT INTO INDUSTRIAL_HOL_DB.OPERATIONS.WORK_ORDERS
+SELECT 273, 7, 18, 2, 'Preventive', 'High', 'Belt tension adjustment', DATEADD(DAY, -19, CURRENT_DATE()), DATEADD(DAY, -17, CURRENT_DATE()), DATEADD(DAY, -17, CURRENT_DATE()), 'Completed', 13.9, 18.9, 1417.33, 1040.28
 UNION ALL SELECT 274, 34, 9, 1, 'Preventive', 'Medium', 'Belt tension adjustment', DATEADD(DAY, -19, CURRENT_DATE()), DATEADD(DAY, -18, CURRENT_DATE()), DATEADD(DAY, -18, CURRENT_DATE()), 'Completed', 3.0, 2.1, 2408.79, 143.4
 UNION ALL SELECT 275, 16, 18, 4, 'Preventive', 'High', 'Scheduled maintenance', DATEADD(DAY, -18, CURRENT_DATE()), DATEADD(DAY, -16, CURRENT_DATE()), DATEADD(DAY, -16, CURRENT_DATE()), 'Completed', 6.4, 7.4, 2358.16, 468.86
 UNION ALL SELECT 276, 8, 10, 2, 'Corrective', 'Medium', 'Motor rewinding', DATEADD(DAY, -17, CURRENT_DATE()), DATEADD(DAY, -16, CURRENT_DATE()), DATEADD(DAY, -16, CURRENT_DATE()), 'Completed', 7.7, 5.5, 76.17, 199.62
@@ -426,7 +428,6 @@ UNION ALL SELECT 317, 13, 20, 3, 'Inspection', 'High', 'Wear assessment', DATEAD
 UNION ALL SELECT 318, 13, 4, 3, 'Preventive', 'High', 'Filter replacement', DATEADD(DAY, -2, CURRENT_DATE()), DATEADD(DAY, -1, CURRENT_DATE()), NULL, 'Scheduled', 5.4, NULL, NULL, NULL
 UNION ALL SELECT 319, 27, 18, 6, 'Preventive', 'Medium', 'Belt tension adjustment', DATEADD(DAY, -1, CURRENT_DATE()), DATEADD(DAY, -1, CURRENT_DATE()), NULL, 'In Progress', 6.7, NULL, NULL, NULL
 UNION ALL SELECT 320, 26, 12, 2, 'Emergency', 'High', 'Vibration alert', DATEADD(DAY, -1, CURRENT_DATE()), DATEADD(DAY, -1, CURRENT_DATE()), NULL, 'Scheduled', 9.7, NULL, NULL, NULL;
-
 
 CREATE OR REPLACE TABLE INDUSTRIAL_HOL_DB.OPERATIONS.DOWNTIME_EVENTS (
   EVENT_ID INTEGER,

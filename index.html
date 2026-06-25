@@ -893,8 +893,8 @@ footer strong { color: #64748B; }
     <div class="info-card">
       <div class="info-icon">📡</div>
       <div class="info-label">WiFi</div>
-      <div class="info-value">CBCKOP Guest</div>
-      <div class="info-detail">Password: CbcKopB33r</div>
+      <div class="info-value">ECCguest1 / ECCguest2 / ECCguest3</div>
+      <div class="info-detail">Password: eccguest</div>
     </div>
     <div class="info-card" style="position:relative;">
       <div class="info-icon">🔗</div>
@@ -1358,18 +1358,7 @@ Business intelligence rules:
 - Flag &quot;extended stay&quot; when LENGTH_OF_STAY &gt; 7
 - Flag &quot;critical lab&quot; when RESULT_FLAG = 'Critical'
 
-Make sure it can answer questions like:
-1. &quot;How many patients are currently admitted?&quot;
-2. &quot;What is the average length of stay by department?&quot;
-3. &quot;Which patients are at high risk for readmission?&quot;
-4. &quot;Show me all critical lab results&quot;
-
 Name it PATIENT_CARE and store it in HEALTHCARE_HOL_DB.CLINICAL.
-For verified queries:
-- Use SEMANTIC_VIEW() function syntax (not raw SQL against physical tables)
-- Reference semantic names as table.semantic_name (e.g., orders.order_date)
-- Place WHERE inside the SEMANTIC_VIEW() parentheses for filter-labeled facts
-- Execute each verified query to confirm it works before finalizing
 </code></pre><button class="expand-btn" onclick="togglePrompt(this)">&#x25BC; Expand</button></div>
 <blockquote class="callout">
 <p><strong>What's happening:</strong> Cortex Code is analyzing your table structures, understanding the clinical relationships, and configuring a complete text-to-SQL layer. This would normally take a data engineer hours to write manually.</p>
@@ -1391,18 +1380,7 @@ Business intelligence rules:
 - Calculate approval rate as percentage of claims with STATUS = 'Approved'
 - Calculate average reimbursement as APPROVED_AMOUNT / CLAIM_AMOUNT
 
-Make sure it can answer questions like:
-1. &quot;What is the total claim amount by insurance type?&quot;
-2. &quot;Which claims were denied?&quot;
-3. &quot;What is the approval rate by department?&quot;
-4. &quot;Show average reimbursement percentage by insurance type&quot;
-
 Name it CLAIMS_ANALYTICS and store it in HEALTHCARE_HOL_DB.CLINICAL.
-For verified queries:
-- Use SEMANTIC_VIEW() function syntax (not raw SQL against physical tables)
-- Reference semantic names as table.semantic_name (e.g., orders.order_date)
-- Place WHERE inside the SEMANTIC_VIEW() parentheses for filter-labeled facts
-- Execute each verified query to confirm it works before finalizing
 </code></pre><button class="expand-btn" onclick="togglePrompt(this)">&#x25BC; Expand</button></div>
 <h3>2.3 Explore Your Semantic Model in Snowsight</h3>
 <p>Step out of Cortex Code for a moment -- let's see what you built in the Snowsight UI.</p>
@@ -2249,18 +2227,7 @@ Business intelligence rules:
 - Flag &quot;concentrated position&quot; when POSITION_PCT &gt; 15
 - Flag &quot;high risk&quot; when RISK_SCORE &gt; 0.8 (from FINSERV_HOL_DB.RISK.RISK_SCORES)
 
-Make sure it can answer questions like:
-1. &quot;What is the total AUM by advisor?&quot;
-2. &quot;Which accounts have concentrated positions above 15%?&quot;
-3. &quot;Show me the top 10 holdings by unrealized P&amp;L&quot;
-4. &quot;What is the YTD performance vs S&amp;P 500 benchmark?&quot;
-
 Name it PORTFOLIO_ANALYTICS and store it in FINSERV_HOL_DB.PORTFOLIO.
-For verified queries:
-- Use SEMANTIC_VIEW() function syntax (not raw SQL against physical tables)
-- Reference semantic names as table.semantic_name (e.g., orders.order_date)
-- Place WHERE inside the SEMANTIC_VIEW() parentheses for filter-labeled facts
-- Execute each verified query to confirm it works before finalizing
 </code></pre><button class="expand-btn" onclick="togglePrompt(this)">&#x25BC; Expand</button></div>
 <h3>2.2 Create a Cortex Analyst Semantic View for Risk Analytics</h3>
 <p>Copy and paste this prompt into Cortex Code:</p>
@@ -3144,19 +3111,8 @@ Business intelligence rules:
   CRITICALITY = 'Critical'
 - Flag &quot;quality failure&quot; when PASS_FAIL = 'Fail'
 
-Make sure it can answer questions like:
-1. &quot;Which equipment is overdue for preventive maintenance?&quot;
-2. &quot;What is the mean time to repair by facility?&quot;
-3. &quot;Show me all unplanned downtime events this quarter&quot;
-4. &quot;Which production lines have the highest defect rates?&quot;
-
 Name it EQUIPMENT_ANALYTICS and store it in
 INDUSTRIAL_HOL_DB.OPERATIONS.
-For verified queries:
-- Use SEMANTIC_VIEW() function syntax (not raw SQL against physical tables)
-- Reference semantic names as table.semantic_name (e.g., orders.order_date)
-- Place WHERE inside the SEMANTIC_VIEW() parentheses for filter-labeled facts
-- Execute each verified query to confirm it works before finalizing
 </code></pre><button class="expand-btn" onclick="togglePrompt(this)">&#x25BC; Expand</button></div>
 <h3>2.2 Create a Cortex Analyst Semantic View for Energy Analytics</h3>
 <p>Copy and paste this prompt into Cortex Code:</p>
@@ -3173,18 +3129,7 @@ Business intelligence rules:
 - Calculate budget variance as (ACTUAL_KWH - BUDGETED_KWH) / BUDGETED_KWH
 - Track peak demand from PEAK_DEMAND_KW
 
-Make sure it can answer questions like:
-1. &quot;Which facilities are over their energy budget?&quot;
-2. &quot;What is the total energy cost by facility this year?&quot;
-3. &quot;Show me peak demand trends by energy type&quot;
-4. &quot;Which meters have the highest budget variance?&quot;
-
 Name it ENERGY_CONSUMPTION and store it in INDUSTRIAL_HOL_DB.ENERGY.
-For verified queries:
-- Use SEMANTIC_VIEW() function syntax (not raw SQL against physical tables)
-- Reference semantic names as table.semantic_name (e.g., orders.order_date)
-- Place WHERE inside the SEMANTIC_VIEW() parentheses for filter-labeled facts
-- Execute each verified query to confirm it works before finalizing
 </code></pre><button class="expand-btn" onclick="togglePrompt(this)">&#x25BC; Expand</button></div>
 <h3>2.3 Explore Your Semantic Model in Snowsight</h3>
 <p>Step out of Cortex Code for a moment -- let's see what you built in the Snowsight UI.</p>
